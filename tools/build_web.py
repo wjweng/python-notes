@@ -250,6 +250,58 @@ def build(ch: dict) -> tuple[Path, int]:
     return dst, runnable
 
 
+INDEX = """<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * {{ box-sizing: border-box; }}
+  body {{ margin: 0; background: #0d1117; color: #e6edf3; padding: 64px 20px 90px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.8; }}
+  .wrap {{ max-width: 760px; margin: 0 auto; }}
+  h1 {{ font-size: 40px; font-weight: 900; margin: 0 0 10px; }}
+  .lead {{ color: #8b949e; margin-bottom: 46px; }}
+  .unit {{ font-size: 14px; font-weight: 500; letter-spacing: .15em; margin: 38px 0 12px; }}
+  a.ch {{ display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit;
+          border: 1px solid #30363d; border-radius: 9px; padding: 15px 18px; margin-bottom: 9px;
+          transition: border-color .15s, background .15s; }}
+  a.ch:hover {{ background: #161b22; }}
+  .n {{ font-family: ui-monospace, monospace; font-size: 15px; opacity: .65; }}
+  .t {{ font-weight: 700; font-size: 17px; }}
+  .go {{ margin-left: auto; font-size: 13px; color: #8b949e; }}
+  footer {{ margin-top: 60px; color: #8b949e; font-size: 14px;
+            border-top: 1px solid #30363d; padding-top: 22px; }}
+  footer a {{ color: #58a6ff; }}
+</style>
+</head>
+<body><div class="wrap">
+<h1>Python 學習筆記</h1>
+<div class="lead">每一章的程式碼都可以直接在這裡改、直接執行，不用安裝任何東西。</div>
+{items}
+<footer>作者 weijie ・ 原始碼與程式碼範例在 <a href="https://github.com/wjweng/python-notes">GitHub</a></footer>
+</div></body>
+</html>
+"""
+
+
+def build_index(chapters: list[dict]) -> Path:
+    items, seen = "", None
+    for ch in chapters:
+        if ch["unit"] != seen:
+            seen = ch["unit"]
+            items += f'<div class="unit" style="color:{ch["accent"]}">{seen}</div>\n'
+        items += (f'<a class="ch" href="./web/{ch["dir"]}.html">'
+                  f'<span class="n" style="color:{ch["accent"]}">{ch["num"]}</span>'
+                  f'<span class="t">{ch["title"]}</span>'
+                  f'<span class="go">開啟 →</span></a>\n')
+    dst = ROOT / "index.html"
+    dst.write_text(INDEX.format(items=items), encoding="utf-8")
+    return dst
+
+
 def main() -> None:
     only = sys.argv[1] if len(sys.argv) > 1 else None
     for ch in load_chapters():
@@ -258,6 +310,8 @@ def main() -> None:
         p, n = build(ch)
         print(f"{ch['num']}  {p.relative_to(ROOT)}  {p.stat().st_size // 1024} KB"
               f"　可執行區塊 {n} 個")
+    idx = build_index(load_chapters())
+    print(f"    索引頁：{idx.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
