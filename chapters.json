@@ -1,0 +1,72 @@
+{
+  "units": [
+    {
+      "id": 1,
+      "name": "入門",
+      "accent": "#4ec9b0",
+      "days": "1-4",
+      "desc": "環境、變數與型態、運算、if"
+    },
+    {
+      "id": 2,
+      "name": "串列與迴圈",
+      "accent": "#569cd6",
+      "days": "5-11",
+      "desc": "list、for、while、random 模組"
+    },
+    {
+      "id": 3,
+      "name": "函數與資料結構",
+      "accent": "#c586c0",
+      "days": "12-18",
+      "desc": "函數、字典、元組、集合、變數範圍"
+    },
+    {
+      "id": 4,
+      "name": "物件導向與模組",
+      "accent": "#dcdcaa",
+      "days": "19-23",
+      "desc": "類別、封裝、繼承、模組"
+    },
+    {
+      "id": 5,
+      "name": "繪圖與遊戲",
+      "accent": "#ce9178",
+      "days": "24-26",
+      "desc": "Turtle Graphics、貪食蛇專題"
+    },
+    {
+      "id": 6,
+      "name": "檔案與資料處理",
+      "accent": "#4fc1ff",
+      "days": "27-29",
+      "desc": "路徑、CSV、Pandas"
+    },
+    {
+      "id": 7,
+      "name": "圖形介面",
+      "accent": "#b5cea8",
+      "days": "30-32",
+      "desc": "tkinter 元件與版面配置"
+    },
+    {
+      "id": 8,
+      "name": "例外與資料格式",
+      "accent": "#f97583",
+      "days": "33-35",
+      "desc": "異常處理、JSON"
+    }
+  ],
+  "chapters": [
+    {
+      "num": "01",
+      "unit": 1,
+      "dir": "01-把開發環境準備好",
+      "title": "把開發環境準備好",
+      "snippet": "uv python install 3.13\nuv init hello-python\nuv run main.py\n\ndef greeting(name: str = \"Python\") -> str:\n    return f\"Hello, {name}!\"\n\nprint(greeting())\n# Hello, Python!",
+      "web_static": [
+        "def env_info"
+      ]
+    }
+  ]
+}

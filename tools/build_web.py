@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""把章節的 README.md 產生成完整的互動網頁。
+
+整篇文章都會渲染出來，其中 Python 程式碼區塊變成可直接執行的編輯器（Pyodide），
+其餘區塊維持靜態顯示。產出的 HTML 不需要後端，可直接嵌進個人網站。
+"""
+import html
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "web"
+PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"
+
+# 這些語言的區塊只是給人看的指令，不放執行按鈕
+STATIC_LANGS = {"bash", "powershell", "text", "", None}
+
+
+# --------------------------------------------------------------------------
+# 極簡 Markdown 轉 HTML（只支援本專案用得到的語法）
+# --------------------------------------------------------------------------
+def inline(s: str) -> str:
+    s = html.escape(s)
+    s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
+    s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
+    s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
+    return s
+
+
+def render(md: str, static_marks: list[str]) -> tuple[str, int]:
+    """回傳 (HTML, 可執行區塊數量)。"""
+    out: list[str] = []
+    runnable = 0
+    lines = md.split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+
+        # 程式碼區塊
+        if line.startswith("```"):
+            lang = line[3:].strip()
+            body: list[str] = []
+            i += 1
+            while i < len(lines) and not lines[i].startswith("```"):
+                body.append(lines[i])
+                i += 1
+            i += 1
+            code = "\n".join(body)
+            # 有些 python 區塊不適合在瀏覽器跑（例如檢查本機環境的程式，
+            # 在 Pyodide 裡回報的是 Pyodide 自己的環境，對讀者沒有意義）
+            is_static = any(mark in code for mark in static_marks)
+            if lang == "python" and not is_static:
+                out.append(
+                    f'<div class="demo"><div class="head">'
+                    f'<span class="name">可以改改看，按執行</span>'
+                    f'<button id="btn{runnable}" onclick="run({runnable})" disabled>執行</button></div>'
+                    f'<textarea id="code{runnable}" spellcheck="false" rows="{max(3, len(body))}">'
+                    f'{html.escape(code)}</textarea>'
+                    f'<pre id="out{runnable}"></pre></div>'
+                )
+                runnable += 1
+            else:
+                cls = ' class="lang-python"' if lang == "python" else (
+                      f' class="lang-{lang}"' if lang else "")
+                out.append(f"<pre class=\"static\"><code{cls}>{html.escape(code)}</code></pre>")
+            continue
+
+        # 表格
+        if line.startswith("|") and i + 1 < len(lines) and re.match(r"^\|[\s:|-]+\|$", lines[i + 1]):
+            head = [c.strip() for c in line.strip("|").split("|")]
+            i += 2
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                rows.append([c.strip() for c in lines[i].strip("|").split("|")])
+                i += 1
+            th = "".join(f"<th>{inline(c)}</th>" for c in head)
+            tb = "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rows)
+            out.append(f"<table><thead><tr>{th}</tr></thead><tbody>{tb}</tbody></table>")
+            continue
+
+        # 標題
+        if m := re.match(r"^(#{1,4})\s+(.*)$", line):
+            lv = len(m.group(1))
+            if lv > 1:  # h1 由頁面標題負責
+                out.append(f"<h{lv}>{inline(m.group(2))}</h{lv}>")
+            i += 1
+            continue
+
+        # 分隔線
+        if re.match(r"^-{3,}$", line.strip()):
+            out.append("<hr>")
+            i += 1
+            continue
+
+        # 條列
+        if re.match(r"^[-*]\s+|^\d+\.\s+", line):
+            ordered = bool(re.match(r"^\d+\.\s+", line))
+            items = []
+            while i < len(lines) and re.match(r"^[-*]\s+|^\d+\.\s+", lines[i]):
+                items.append(re.sub(r"^([-*]|\d+\.)\s+", "", lines[i]))
+                i += 1
+            tag = "ol" if ordered else "ul"
+            out.append(f"<{tag}>" + "".join(f"<li>{inline(x)}</li>" for x in items) + f"</{tag}>")
+            continue
+
+        # 引言
+        if line.startswith(">"):
+            quote = []
+            while i < len(lines) and lines[i].startswith(">"):
+                quote.append(lines[i].lstrip("> "))
+                i += 1
+            out.append(f"<blockquote>{inline(' '.join(quote))}</blockquote>")
+            continue
+
+        # 段落
+        if line.strip():
+            para = []
+            while i < len(lines) and lines[i].strip() and not re.match(
+                r"^(```|\||#{1,4}\s|[-*]\s|\d+\.\s|>|-{3,}$)", lines[i]
+            ):
+                para.append(lines[i])
+                i += 1
+            if para:
+                out.append(f"<p>{inline(' '.join(para))}</p>")
+            continue
+
+        i += 1
+
+    return "\n".join(out), runnable
+
+
+PAGE = """<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title} — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {{ --accent: {accent}; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }}
+  * {{ box-sizing: border-box; }}
+  body {{ margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }}
+  .wrap {{ max-width: 780px; margin: 0 auto; }}
+  .unit {{ color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }}
+  h1 {{ font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }}
+  h2 {{ font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }}
+  h3 {{ font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }}
+  p {{ margin: 14px 0; }}
+  a {{ color: var(--accent); }}
+  code {{ font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }}
+  pre.static {{ background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }}
+  pre.static code {{ background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }}
+  table {{ border-collapse: collapse; width: 100%; margin: 18px 0; font-size: 15px; }}
+  th, td {{ border: 1px solid var(--line); padding: 9px 13px; text-align: left; }}
+  th {{ background: var(--panel); font-weight: 700; }}
+  blockquote {{ border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }}
+  ul, ol {{ padding-left: 26px; }}
+  li {{ margin: 6px 0; }}
+  hr {{ border: 0; border-top: 1px solid var(--line); margin: 38px 0; }}
+  .demo {{ border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }}
+  .head {{ background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }}
+  .name {{ font-size: 12.5px; }}
+  textarea {{ width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }}
+  button {{ background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }}
+  button:disabled {{ opacity: .4; cursor: default; }}
+  pre[id^="out"] {{ margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }}
+  pre.err {{ color: #ff7b72 !important; }}
+  #boot {{ position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">{unit}</div>
+  <h1>{title}</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+{content}
+</div>
+<script src="{pyodide}"></script>
+<script>
+let pyodide = null;
+async function boot() {{
+  const tip = document.getElementById("boot");
+  try {{
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  }} catch (e) {{
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }}
+}}
+async function run(i) {{
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {{
+    pyodide.setStdout({{ batched: (s) => {{ out.textContent += s + "\\n"; }} }});
+    pyodide.setStderr({{ batched: (s) => {{ out.textContent += s + "\\n"; }} }});
+    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  }} catch (e) {{
+    out.className = "err";
+    out.textContent = String(e).split("\\n").slice(-6).join("\\n");
+  }}
+}}
+boot();
+</script>
+</body>
+</html>
+"""
+
+
+def load_chapters() -> list[dict]:
+    """讀 chapters.json，把所屬單元的名稱與主題色併進每一章。"""
+    data = json.loads((ROOT / "chapters.json").read_text(encoding="utf-8"))
+    units = {u["id"]: u for u in data["units"]}
+    out = []
+    for ch in data["chapters"]:
+        u = units[ch["unit"]]
+        cn = "一二三四五六七八九十"[u["id"] - 1]
+        out.append({**ch, "accent": u["accent"], "unit": f"單元{cn}・{u['name']}"})
+    return out
+
+
+def build(ch: dict) -> tuple[Path, int]:
+    md = (ROOT / "chapters" / ch["dir"] / "README.md").read_text(encoding="utf-8")
+    md = re.sub(r"^# .*\n", "", md, count=1)          # h1 交給頁面標題
+    md = re.sub(r"\n## 本章程式碼\n.*$", "", md, flags=re.S)  # 站內導覽連結不進網頁版
+    content, runnable = render(md, ch.get("web_static", []))
+    OUT.mkdir(exist_ok=True)
+    dst = OUT / f"{ch['dir']}.html"
+    dst.write_text(PAGE.format(title=ch["title"], unit=ch["unit"], accent=ch["accent"],
+                               content=content, pyodide=PYODIDE), encoding="utf-8")
+    return dst, runnable
+
+
+def main() -> None:
+    only = sys.argv[1] if len(sys.argv) > 1 else None
+    for ch in load_chapters():
+        if only and ch["num"] != only:
+            continue
+        p, n = build(ch)
+        print(f"{ch['num']}  {p.relative_to(ROOT)}  {p.stat().st_size // 1024} KB"
+              f"　可執行區塊 {n} 個")
+
+
+if __name__ == "__main__":
+    main()
