@@ -1,0 +1,20 @@
+name: 範例程式碼可執行性
+
+on: [push, pull_request]
+
+jobs:
+  run-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: 逐支執行所有章節範例
+        run: |
+          fail=0
+          for f in chapters/*/code/*.py; do
+            echo "─── $f"
+            python "$f" || { echo "❌ 執行失敗：$f"; fail=1; }
+          done
+          exit $fail
