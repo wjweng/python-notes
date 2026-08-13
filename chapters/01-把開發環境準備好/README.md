@@ -4,6 +4,8 @@
 
 這一章把環境一次弄對，後面就不用再回頭。
 
+> **想直接寫程式的話，可以跳過這一章。** 每一章都有[線上版](https://wjweng.github.io/python-notes/)，打開瀏覽器就能改程式碼看結果，什麼都不用裝。等你想在自己電腦上跑程式時，再回來看這章。
+
 ## 這一章會用到的工具
 
 | 工具 | 做什麼 |
@@ -99,6 +101,25 @@ uv add requests
 ```
 
 這行會做三件事：裝好 requests、寫進 `pyproject.toml`、更新鎖定檔 `uv.lock`。之後在別台電腦上只要執行 `uv sync`，就會裝回一模一樣的版本。
+
+## uv 與傳統做法的指令對照
+
+網路上大多數 Python 教學與問答，用的還是傳統的 pip 加 venv。搜尋問題時看到的指令跟這裡不一樣是正常的，對照表如下：
+
+| 要做的事 | uv | 傳統做法 |
+| :--- | :--- | :--- |
+| 安裝 Python | `uv python install 3.13` | 到官網下載安裝檔 |
+| 建立專案 | `uv init 專案名` | 自己開資料夾 |
+| 建立虛擬環境 | 不用，執行時自動建 | `python -m venv .venv` |
+| 啟動虛擬環境 | 不用 | `source .venv/bin/activate` |
+| 安裝套件 | `uv add requests` | `pip install requests` |
+| 記錄用了哪些套件 | 自動寫進 `pyproject.toml` | `pip freeze > requirements.txt` |
+| 在別台電腦還原 | `uv sync` | `pip install -r requirements.txt` |
+| 執行程式 | `uv run main.py` | `python main.py`（需先啟動虛擬環境）|
+
+右邊那欄的做法完全能用，只是步驟比較多，而且「忘記啟動虛擬環境」是新手最常見的坑之一——uv 把這步拿掉了，所以不會發生。
+
+看別人的教學時，把左右兩欄對應起來就好。
 
 ## 編輯器：VS Code
 

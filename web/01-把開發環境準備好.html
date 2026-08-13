@@ -59,6 +59,7 @@
   <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
 <p>很多人學 Python 的第一天，卡在還沒寫到程式的地方——裝了 Python、裝了編輯器，然後發現套件裝不起來，或是裝到了奇怪的地方。過幾個月換一台電腦，又要重來一次。</p>
 <p>這一章把環境一次弄對，後面就不用再回頭。</p>
+<blockquote><strong>想直接寫程式的話，可以跳過這一章。</strong> 每一章都有<a href="https://wjweng.github.io/python-notes/">線上版</a>，打開瀏覽器就能改程式碼看結果，什麼都不用裝。等你想在自己電腦上跑程式時，再回來看這章。</blockquote>
 <h2>這一章會用到的工具</h2>
 <table><thead><tr><th>工具</th><th>做什麼</th></tr></thead><tbody><tr><td>uv</td><td>管理 Python 版本、虛擬環境、套件，一個工具全包</td></tr><tr><td>VS Code</td><td>寫程式的編輯器</td></tr></tbody></table>
 <p>只有兩樣。以前的做法是先到官網裝 Python，再用內建的 pip 裝套件，再另外學 venv 建虛擬環境，中間任何一步裝錯位置，後面就會出現「明明裝了卻找不到」的狀況。</p>
@@ -98,6 +99,11 @@ cd hello-python</code></pre>
 <p>uv 把虛擬環境放在專案底下的 <code>.venv/</code>。裝套件時不需要手動啟動它：</p>
 <pre class="static"><code class="lang-bash">uv add requests</code></pre>
 <p>這行會做三件事：裝好 requests、寫進 <code>pyproject.toml</code>、更新鎖定檔 <code>uv.lock</code>。之後在別台電腦上只要執行 <code>uv sync</code>，就會裝回一模一樣的版本。</p>
+<h2>uv 與傳統做法的指令對照</h2>
+<p>網路上大多數 Python 教學與問答，用的還是傳統的 pip 加 venv。搜尋問題時看到的指令跟這裡不一樣是正常的，對照表如下：</p>
+<table><thead><tr><th>要做的事</th><th>uv</th><th>傳統做法</th></tr></thead><tbody><tr><td>安裝 Python</td><td><code>uv python install 3.13</code></td><td>到官網下載安裝檔</td></tr><tr><td>建立專案</td><td><code>uv init 專案名</code></td><td>自己開資料夾</td></tr><tr><td>建立虛擬環境</td><td>不用，執行時自動建</td><td><code>python -m venv .venv</code></td></tr><tr><td>啟動虛擬環境</td><td>不用</td><td><code>source .venv/bin/activate</code></td></tr><tr><td>安裝套件</td><td><code>uv add requests</code></td><td><code>pip install requests</code></td></tr><tr><td>記錄用了哪些套件</td><td>自動寫進 <code>pyproject.toml</code></td><td><code>pip freeze &gt; requirements.txt</code></td></tr><tr><td>在別台電腦還原</td><td><code>uv sync</code></td><td><code>pip install -r requirements.txt</code></td></tr><tr><td>執行程式</td><td><code>uv run main.py</code></td><td><code>python main.py</code>（需先啟動虛擬環境）</td></tr></tbody></table>
+<p>右邊那欄的做法完全能用，只是步驟比較多，而且「忘記啟動虛擬環境」是新手最常見的坑之一——uv 把這步拿掉了，所以不會發生。</p>
+<p>看別人的教學時，把左右兩欄對應起來就好。</p>
 <h2>編輯器：VS Code</h2>
 <p>到 <a href="https://code.visualstudio.com/">code.visualstudio.com</a> 下載安裝。開啟後裝一個擴充套件就夠了：左側點擴充功能圖示，搜尋 <strong>Python</strong>，安裝微軟出的那個。</p>
 <p>裝好後用 VS Code 開啟剛才的 <code>hello-python</code> 資料夾。右下角會顯示目前使用的直譯器，確認它指向專案底下的 <code>.venv</code>。如果沒有，按 <code>Ctrl + Shift + P</code>（macOS 是 <code>Cmd + Shift + P</code>），輸入 <code>Python: Select Interpreter</code>，選擇 <code>.venv</code> 那一個。</p>
