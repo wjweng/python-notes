@@ -85,6 +85,10 @@ def render(ch: dict, out: Path) -> None:
         title_size=64 if len(title) <= 12 else 54,
         snippet=(ch.get("snippet") or "").replace("<", "&lt;"),
     )
+    if "--html" in sys.argv:  # 產出 HTML 方便用瀏覽器即時調版面
+        dbg = out.with_suffix(".html")
+        dbg.write_text(html, encoding="utf-8")
+        print(f"    除錯用 HTML：{dbg}")
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "cover.html"
         page.write_text(html, encoding="utf-8")
@@ -111,7 +115,8 @@ def load_chapters() -> list[dict]:
 
 def main() -> None:
     chapters = load_chapters()
-    only = sys.argv[1] if len(sys.argv) > 1 else None
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    only = args[0] if args else None
     for ch in chapters:
         if only and ch["num"] != only:
             continue
