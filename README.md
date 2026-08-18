@@ -1,12 +1,12 @@
 # Python 學習筆記
 
-從零開始的 Python 學習筆記。每一章都有可直接執行的程式碼，並提供三種閱讀方式：在這裡讀、在 Colab 互動、在瀏覽器直接改程式碼看結果。
+從零開始的 Python 學習筆記。每一章都有可直接執行的程式碼，並提供三種讀法：在 GitHub 讀、在 Colab 互動、在網頁上直接改程式碼看結果。
 
 ## 章節
 
-| # | 章節 | 讀 | Colab | 瀏覽器執行 |
+| # | 章節 | GitHub | Colab | 網頁 |
 | :- | :--- | :-: | :-: | :-: |
-| 01 | 把開發環境準備好 | [📖](./chapters/01-environment-setup/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb) | [⚡](./web/01-environment-setup.html) |
+| 01 | 把開發環境準備好 | [📖](./chapters/01-environment-setup/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/01-environment-setup.html) |
 
 ## 這個 repo 怎麼運作
 
