@@ -12,11 +12,32 @@
   body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
           font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
   .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  #toc { display: none; }
+  @media (min-width: 1320px) {
+    #toc { display: flex; flex-direction: column; position: fixed; top: 0; left: 18px;
+            width: 244px; height: 100vh; padding: 30px 0 40px; z-index: 10; }
+    #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                  text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                  padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+    #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+    #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                   margin-bottom: 10px; }
+    #toc nav { overflow-y: auto; min-height: 0; }
+    #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                   text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                   transition: color .15s, border-color .15s; }
+    #toc a.item:hover { color: var(--text); }
+    #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+    #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  }
   .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
   h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
   h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
         border-top: 1px solid var(--line); }
   h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
   p { margin: 14px 0; }
   a { color: var(--accent); }
   code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
@@ -77,11 +98,11 @@
 <p>話不多說，我們就開始吧！</p>
 <p>首先，要先把編寫 Python 的環境準備好，我會使用 uv 這個 Python 套件與專案管理器，以及 VS Code 做為 Python 程式的編輯器。</p>
 <blockquote><strong>想直接進入程式的部分的話，也可以跳過這一章。</strong> 我替每一章都製作了 <a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb">Colab 版</a>，用 Google 帳號登入就能改程式碼、按執行看結果，或複製一份到你的雲端硬碟中，這樣你所修改的東西就能保留在自己的儲存空間中，什麼都不用裝。 等你想在自己電腦上跑程式時，再回來看這章。</blockquote>
-<h2>這一章會用到的工具</h2>
+<h2 id="s1">這一章會用到的工具</h2>
 <div class="tablewrap"><table><thead><tr><th>工具</th><th>做什麼</th></tr></thead><tbody><tr><td>uv</td><td>管理 Python 版本、虛擬環境、套件</td></tr><tr><td>VS Code</td><td>寫程式的編輯器</td></tr></tbody></table></div>
 <p>另一個常見的做法是先到官網裝 Python，並使用 venv 建立虛擬環境，再用 pip 安裝需要的套件，現在 uv 把這三件事包在一起。我在後面也做了一個這兩種方法的對照表，有興趣的讀者可以參考。</p>
 <p>關於 uv 的詳細說明可以參考<a href="https://docs.astral.sh/uv/">官網</a>，以下僅就安裝所需要的指令來做說明。</p>
-<h2>安裝 uv</h2>
+<h2 id="s2">安裝 uv</h2>
 <p>Windows 開啟 PowerShell，執行：</p>
 <pre class="static"><code class="lang-powershell">powershell -ExecutionPolicy ByPass -c &quot;irm https://astral.sh/uv/install.ps1 | iex&quot;</code></pre>
 <p>macOS 或 Linux 開啟終端機，執行：</p>
@@ -89,7 +110,7 @@
 <p>裝完之後<strong>關掉終端機再重開一次</strong>，否則系統可能找不到這個新指令。重開後詢問版本：</p>
 <pre class="static"><code class="lang-bash">uv --version</code></pre>
 <p>有印出版本號就成功了。</p>
-<h2>用 uv 安裝 Python</h2>
+<h2 id="s3">用 uv 安裝 Python</h2>
 <pre class="static"><code class="lang-bash">uv python install 3.13</code></pre>
 <p>這行會下載 Python 3.13 並交由 uv 管理。它不會動到系統原本的 Python，也不需要設定環境變數。</p>
 <p>裝完確認一下，看看到底裝進去了沒、裝的是哪一版：</p>
@@ -99,7 +120,7 @@
 cpython-3.12.3-...     /usr/bin/python3.12</code></pre>
 <p>第一行的路徑是剛才裝的 Python 3.13，第二行是我的系統原本就有的 Python，uv 沒有動到它，兩者並存。</p>
 <p><code>--only-installed</code> 這個旗標是為了讓這行指令只列出已經安裝的 Python 版本；不加的話，uv 會把「可以下載但還沒裝」的版本也一起列出來（後方會標有 <code>&lt;download available&gt;</code>）。</p>
-<h2>建立第一個專案</h2>
+<h2 id="s4">建立第一個專案</h2>
 <p>接著我們就可以來建立第一個專案啦！找一個放程式的資料夾，執行：</p>
 <pre class="static"><code class="lang-bash">uv init --no-package 01-environment-setup
 cd 01-environment-setup</code></pre>
@@ -113,7 +134,7 @@ cd 01-environment-setup</code></pre>
 └── .git/             # uv 順手幫你開好的版本控制庫</code></pre>
 <p>後面三個是隱藏檔，<strong><code>uv init</code> 會順手執行 <code>git init</code></strong>，自動建立起版本控制的 <code>.git/</code> <code>.gitignore</code>。現在可以完全不用管它，不影響 Python 的學習。</p>
 <p><code>pyproject.toml</code> 記錄這個專案需要哪些套件。有了它，換一台電腦只要一行指令就能把環境還原回來，不用憑記憶回想當初裝過什麼。</p>
-<h3>--no-package 是什麼？</h3>
+<h3 id="s5">--no-package 是什麼？</h3>
 <p>不加這個旗標的話，<code>uv init</code> 建出來的是另一種版型：</p>
 <pre class="static"><code>01-environment-setup/
 └── src/
@@ -125,29 +146,29 @@ cd 01-environment-setup</code></pre>
 <p>第一次執行時 uv 會自動建立虛擬環境，執行過後，畫面上會看到以下這行文字：</p>
 <pre class="static"><code>Hello from 01-environment-setup!</code></pre>
 <p>恭喜你已經從頭到尾跑過一次環境建置與程式的執行，至此環境就已經通了，接下來我們要學習的就是改變 <code>main.py</code> 的內容，來達到我們想要控制程式輸出的結果。</p>
-<h2>虛擬環境是什麼</h2>
+<h2 id="s6">虛擬環境是什麼</h2>
 <p>我們前面一直提到虛擬環境，它究竟是什麼呢？uv 又幫我們做了什麼事？</p>
 <p>假設同時有兩個專案，A 專案需要某套件的 1.0 版，B 專案需要 2.0 版。如果所有套件都裝在同一個地方，這兩個專案就會打架。虛擬環境的做法是<strong>讓每個專案有自己獨立的套件資料夾</strong>，互不干擾。</p>
 <p>uv 會把虛擬環境放在專案底下的 <code>.venv/</code>。假設我們要裝一個 <code>requests</code> 套件：</p>
 <pre class="static"><code class="lang-bash">uv add requests</code></pre>
 <p>這行指令會做三件事：裝好 requests、寫進 <code>pyproject.toml</code>、更新鎖定檔 <code>uv.lock</code>。之後在別台電腦上只要執行 <code>uv sync</code>，就會裝回一模一樣的版本。</p>
-<h2>uv 與傳統做法的指令對照</h2>
+<h2 id="s7">uv 與傳統做法的指令對照</h2>
 <p>在進入下一個主題之前，我們來比較一下前面有提到的 pip 加 venv 的環境建置方式。對照表如下：</p>
 <div class="tablewrap"><table><thead><tr><th>要做的事</th><th>uv</th><th>傳統做法</th></tr></thead><tbody><tr><td>安裝 Python</td><td><code>uv python install 3.13</code></td><td>到官網下載安裝檔</td></tr><tr><td>建立專案</td><td><code>uv init --no-package 專案名</code></td><td>自己開資料夾</td></tr><tr><td>建立虛擬環境</td><td>不用，執行時自動建</td><td><code>python -m venv .venv</code></td></tr><tr><td>啟動虛擬環境</td><td>不用</td><td><code>source .venv/bin/activate</code></td></tr><tr><td>安裝套件</td><td><code>uv add requests</code></td><td><code>pip install requests</code></td></tr><tr><td>記錄用了哪些套件</td><td>自動寫進 <code>pyproject.toml</code></td><td><code>pip freeze &gt; requirements.txt</code></td></tr><tr><td>在別台電腦還原</td><td><code>uv sync</code></td><td><code>pip install -r requirements.txt</code></td></tr><tr><td>執行程式</td><td><code>uv run main.py</code></td><td><code>python main.py</code>（需先啟動虛擬環境）</td></tr></tbody></table></div>
-<h3>兩種做法的優缺點</h3>
+<h3 id="s8">兩種做法的優缺點</h3>
 <p>看完對照表，我們也順便來看一下兩種做法各自的優缺點，未來遇到需要選擇的場合，會比較知道怎麼判斷。</p>
 <p>uv 的好處主要在這幾個地方：</p>
 <ul><li><strong>一個工具管完三件事</strong>：Python 版本、虛擬環境、套件都由 uv 處理，不需要在官網下載、<code>venv</code>、<code>pip</code> 之間切換。</li><li><strong>速度快上不少</strong>：uv 是用 Rust 寫的，我在自己的電腦上實測安裝 pandas（不使用快取），pip 花了約 10 秒，uv 只要約 2.4 秒，套件愈多的專案差距會愈明顯。</li><li><strong>不用手動啟動虛擬環境</strong>：<code>uv run</code> 會自動使用專案底下的 <code>.venv</code>，忘記啟動這件事就不會發生。</li><li><strong>環境可以完整重現</strong>：<code>uv.lock</code> 記下每個套件的確切版本，換一台電腦執行 <code>uv sync</code> 就能裝回一模一樣的環境，比 <code>pip freeze</code> 產生的 <code>requirements.txt</code> 嚴謹一些。</li></ul>
 <p>至於要付出的代價，也有幾個：</p>
 <ul><li><strong>網路上的教學大多還是 pip 的寫法</strong>：搜尋問題時看到的指令跟這裡不一樣是正常的，需要自己對照轉換。</li><li><strong>它比較新</strong>：遇到比較少見的問題時，可以參考的討論會比 pip 少一些。</li><li><strong>底層觀念還是要懂</strong>：uv 把 venv 與 pip 的步驟包起來了，但虛擬環境是什麼、套件裝到哪裡去，這些概念在排查問題時還是用得上。</li></ul>
 <p>兩種做法在這個階段都能完成這一系列的所有練習，如果你覺得舊有的方法看起來比較熟悉也沒關係，在這個階段不會有任何影響，把左右兩欄所做的事情對應起來就好。</p>
-<h2>編輯器：VS Code</h2>
+<h2 id="s9">編輯器：VS Code</h2>
 <p>為了可以在一個更方便、美觀的介面來編輯與執行 Python 程式，這系列的文章會使用 VS Code，到 <a href="https://code.visualstudio.com/">code.visualstudio.com</a> 下載安裝。開啟後先裝一個擴充套件就夠了：左側點擴充功能圖示，搜尋 <strong>Python</strong>，安裝 Microsoft 發行的版本。</p>
 <p><img src="../chapters/01-environment-setup/figures/01-fig1-install-python-extension.png" alt="在擴充功能裡搜尋 python，安裝 Microsoft 發行的那一個" title="點一下放大" loading="lazy"><span class="cap">在擴充功能裡搜尋 python，安裝 Microsoft 發行的那一個</span></p>
 <p>裝好後用 VS Code 開啟剛才的 <code>01-environment-setup</code> 資料夾。右下角會顯示目前使用的直譯器，確認它指向專案底下的 <code>.venv</code>。如果沒有，按 <code>Ctrl + Shift + P</code>（macOS 是 <code>Cmd + Shift + P</code>），輸入 <code>Python: Select Interpreter</code>，選擇 <code>.venv</code> 那一個。</p>
 <p><img src="../chapters/01-environment-setup/figures/01-fig2-select-interpreter.png" alt="清單裡標示 Workspace、路徑是 ./.venv/bin/python 的那一項，就是專案自己的虛擬環境" title="點一下放大" loading="lazy"><span class="cap">清單裡標示 Workspace、路徑是 ./.venv/bin/python 的那一項，就是專案自己的虛擬環境</span></p>
 <p>如此一來，編輯器才會用這個環境的 Python 去檢查程式碼，而不是套用系統預設的設定，否則在這個環境中裝好的套件就會找不到，如果要執行的程式依賴這些套件的話就會產生錯誤。</p>
-<h2>第一支程式</h2>
+<h2 id="s10">第一支程式</h2>
 <p>要建立一份新的 Python 格式檔案可以在最上排工作列點選 <code>File</code> -&gt; <code>New File</code>，或是在左側的檔案總管欄位按右鍵新增 <code>New File</code>，把這個檔案取名叫 <code>01_hello.py</code>，在裡面打上：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="3">print(&quot;Hello, Python!&quot;)
 print(&quot;我的第一支程式&quot;)</textarea><pre id="out0"></pre></div>
@@ -159,7 +180,7 @@ print(&quot;我的第一支程式&quot;)</textarea><pre id="out0"></pre></div>
 <p>也可以按 VS Code 右上方的三角形按鈕來執行 Python 程式。要注意的是，這個按鈕用的是剛才選定的直譯器，而不是 <code>uv run</code>，所以直譯器選對了，這個按鈕才會跑在專案自己的虛擬環境裡。</p>
 <p><img src="../chapters/01-environment-setup/figures/01-fig3-run-first-program.png" alt="按右上角的三角形按鈕執行，結果會顯示在下方的終端機" title="點一下放大" loading="lazy"><span class="cap">按右上角的三角形按鈕執行，結果會顯示在下方的終端機</span></p>
 <p><code>print()</code> 是把東西顯示在畫面上的函數，括號裡放要顯示的內容。文字要用引號包起來，單引號或雙引號都可以，但同一個專案裡建議固定用一種。</p>
-<h2>確認環境真的裝對了</h2>
+<h2 id="s11">確認環境真的裝對了</h2>
 <p>寫一支小程式來驗證，新增檔案 <code>02_check_env.py</code>：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="16">import sys
 from pathlib import Path
@@ -184,7 +205,7 @@ in_venv: True</code></pre>
 <p><img src="../chapters/01-environment-setup/figures/01-fig4-check-env-output.png" alt="in_venv 顯示 True，代表跑在專案自己的虛擬環境裡" title="點一下放大" loading="lazy"><span class="cap">in_venv 顯示 True，代表跑在專案自己的虛擬環境裡</span></p>
 <blockquote>在這個網頁上按執行，結果會跟上面的圖示不一樣，原因是網頁版的 Python 是一份編譯成 WebAssembly，跑在瀏覽器分頁裡的 Python，它的環境大概跟你剛才建立的虛擬環境不同，想要看到 <code>in_venv: True</code>，還是要回到自己的電腦上執行。</blockquote>
 <p><code>in_venv</code> 是 <code>True</code>，代表程式跑在專案自己的虛擬環境裡，不是系統的 Python。這行如果是 <code>False</code>，就要回頭檢查上面 VS Code 選直譯器那一步。</p>
-<h2>互動模式</h2>
+<h2 id="s12">互動模式</h2>
 <p>除了寫成檔案執行，也可以直接在終端機裡試語法：</p>
 <pre class="static"><code class="lang-bash">uv run python</code></pre>
 <p>會進入互動模式，提示符號是 <code>&gt;&gt;&gt;</code>：</p>
@@ -194,8 +215,8 @@ in_venv: True</code></pre>
 測試
 &gt;&gt;&gt; exit()</code></pre>
 <p>想確認某個語法怎麼運作，又不想特地開一個檔案時，這樣測試最快。輸入 <code>exit()</code> 可以離開互動模式。</p>
-<h2>常見問題統整</h2>
-<h3>找不到 .venv 的排查步驟</h3>
+<h2 id="s13">常見問題統整</h2>
+<h3 id="s14">找不到 .venv 的排查步驟</h3>
 <p>選單裡沒有 <code>.venv</code> 是很常見的狀況，依序確認：</p>
 <p><strong>一、<code>.venv</code> 真的存在嗎？</strong> 它是<strong>第一次跑 <code>uv run</code> 才建立</strong>的，<code>uv init</code> 不會產生。前面那步如果跳過了，回到終端機執行一次：</p>
 <pre class="static"><code class="lang-bash">uv run main.py</code></pre>
@@ -209,11 +230,38 @@ in_venv: True</code></pre>
 <p>如果不想要這麼麻煩，那就全部留在 Windows，用 PowerShell 跑 uv 吧！把專案放在 <code>C:\</code> 底下。兩條路都可以，<strong>但不要混用</strong>。走 WSL 的話，專案建議放在 WSL 自己的家目錄，放在 <code>/mnt/c/</code> 底下操作檔案會明顯變慢。</p>
 <hr>
 <p>這一章我們準備好了 Python 的開發環境，也從頭建置了第一支 Python 的小程式，了解每一支應用程式的順利執行與否，其實是和它相依的環境息息相關的；我們也比較了 uv 和 pip + venv 的環境建置方式，可以選擇習慣或是喜歡的方法來開始。萬事俱備，之後的所有變化就會在這個程式的語法裡面進行。</p>
-<h2>本章程式碼</h2>
+<h2 id="s15">本章程式碼</h2>
 <ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/01-environment-setup/code/"><code>code/</code></a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
 </div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">這一章會用到的工具</a><a class="item lv2" href="#s2" data-id="s2">安裝 uv</a><a class="item lv2" href="#s3" data-id="s3">用 uv 安裝 Python</a><a class="item lv2" href="#s4" data-id="s4">建立第一個專案</a><a class="item lv3" href="#s5" data-id="s5">--no-package 是什麼？</a><a class="item lv2" href="#s6" data-id="s6">虛擬環境是什麼</a><a class="item lv2" href="#s7" data-id="s7">uv 與傳統做法的指令對照</a><a class="item lv3" href="#s8" data-id="s8">兩種做法的優缺點</a><a class="item lv2" href="#s9" data-id="s9">編輯器：VS Code</a><a class="item lv2" href="#s10" data-id="s10">第一支程式</a><a class="item lv2" href="#s11" data-id="s11">確認環境真的裝對了</a><a class="item lv2" href="#s12" data-id="s12">互動模式</a><a class="item lv2" href="#s13" data-id="s13">常見問題統整</a><a class="item lv3" href="#s14" data-id="s14">找不到 .venv 的排查步驟</a><a class="item lv2" href="#s15" data-id="s15">本章程式碼</a></nav>
+</aside>
 <div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
 <script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
 // 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
 const lb = document.getElementById("lightbox");
 const lbImg = lb.querySelector("img");

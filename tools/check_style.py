@@ -141,6 +141,22 @@ def check_headings(prose: list[tuple[int, str]]) -> list[str]:
     return hits
 
 
+def check_cross_links(text: str, chapter_dir: str) -> list[str]:
+    """跨版本連結必須指向「本章」的頁面，不是站台首頁、也不是別章。
+
+    36 章各自手寫這兩條長網址，複製上一章忘了改編號是遲早的事，這裡擋住。
+    """
+    hits = []
+    for m in re.finditer(r"https://wjweng\.github\.io/python-notes/(\S*?)[)\s]", text):
+        path = m.group(1)
+        if path != f"web/{chapter_dir}.html":
+            hits.append(f"網頁版連結指到 /{path or ''}，應該是 /web/{chapter_dir}.html")
+    for m in re.finditer(r"colab\.research\.google\.com/\S*?/notebooks/(\S*?)\.ipynb", text):
+        if m.group(1) != chapter_dir:
+            hits.append(f"Colab 連結指到 {m.group(1)}.ipynb，應該是 {chapter_dir}.ipynb")
+    return hits
+
+
 def check_ending(text: str, prose: list[tuple[int, str]]) -> list[str]:
     """收尾要有一段收束（呼應開場），不能像舊文直接貼 GitHub 連結。"""
     tail = [raw.strip() for _, raw in prose if raw.strip()]
@@ -217,6 +233,7 @@ def report(path: Path, quiet: bool) -> bool:
         ("沒有 AI 腔", check_ai_tone(prose)),
         ("小標只用兩層且是名詞短語", check_headings(prose)),
         ("有收尾段", check_ending(text, prose)),
+        ("跨版本連結指向本章", check_cross_links(text, path.parent.name)),
     ]
 
     sents = sentences(prose)

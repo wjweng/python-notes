@@ -4,9 +4,15 @@
 
 ## 章節
 
+<!-- chapters:start -->
+
+**單元一・入門**　環境、變數與型態、運算、if
+
 | # | 章節 | GitHub | Colab | 網頁 |
 | :- | :--- | :-: | :-: | :-: |
 | 01 | 把開發環境準備好 | [📖](./chapters/01-environment-setup/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/01-environment-setup.html) |
+
+<!-- chapters:end -->
 
 ## 這個 repo 怎麼運作
 

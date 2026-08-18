@@ -40,9 +40,10 @@ def inline(s: str) -> str:
     return s
 
 
-def render(md: str, static_marks: list[str]) -> tuple[str, int]:
-    """回傳 (HTML, 可執行區塊數量)。"""
+def render(md: str, static_marks: list[str]) -> tuple[str, int, list[tuple[int, str, str]]]:
+    """回傳 (HTML, 可執行區塊數量, 目錄項目)。目錄項目是 (層級, id, 標題)。"""
     out: list[str] = []
+    toc: list[tuple[int, str, str]] = []
     runnable = 0
     lines = md.split("\n")
     i = 0
@@ -92,11 +93,18 @@ def render(md: str, static_marks: list[str]) -> tuple[str, int]:
                        f"<tbody>{tb}</tbody></table></div>")
             continue
 
-        # 標題
+        # 標題。h2 / h3 給 id，右側目錄要跳過去。中文當錨點會被 encode 成一長串，
+        # 所以用流水號，穩定又好讀。
         if m := re.match(r"^(#{1,4})\s+(.*)$", line):
             lv = len(m.group(1))
             if lv > 1:  # h1 由頁面標題負責
-                out.append(f"<h{lv}>{inline(m.group(2))}</h{lv}>")
+                title = m.group(2)
+                if lv in (2, 3):
+                    hid = f"s{len(toc) + 1}"
+                    toc.append((lv, hid, re.sub(r"[`*]", "", title)))
+                    out.append(f'<h{lv} id="{hid}">{inline(title)}</h{lv}>')
+                else:
+                    out.append(f"<h{lv}>{inline(title)}</h{lv}>")
             i += 1
             continue
 
@@ -142,7 +150,7 @@ def render(md: str, static_marks: list[str]) -> tuple[str, int]:
 
         i += 1
 
-    return "\n".join(out), runnable
+    return "\n".join(out), runnable, toc
 
 
 PAGE = """<!doctype html>
@@ -159,11 +167,32 @@ PAGE = """<!doctype html>
   body {{ margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
           font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }}
   .wrap {{ max-width: 780px; margin: 0 auto; }}
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  #toc {{ display: none; }}
+  @media (min-width: 1320px) {{
+    #toc {{ display: flex; flex-direction: column; position: fixed; top: 0; left: 18px;
+            width: 244px; height: 100vh; padding: 30px 0 40px; z-index: 10; }}
+    #toc .home {{ display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                  text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                  padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }}
+    #toc .home:hover {{ color: var(--accent); border-color: var(--accent); }}
+    #toc .label {{ flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                   margin-bottom: 10px; }}
+    #toc nav {{ overflow-y: auto; min-height: 0; }}
+    #toc a.item {{ display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                   text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                   transition: color .15s, border-color .15s; }}
+    #toc a.item:hover {{ color: var(--text); }}
+    #toc a.lv3 {{ padding-left: 24px; font-size: 12.5px; }}
+    #toc a.item.on {{ color: var(--accent); border-left-color: var(--accent); font-weight: 500; }}
+  }}
   .unit {{ color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }}
   h1 {{ font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }}
   h2 {{ font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
         border-top: 1px solid var(--line); }}
   h3 {{ font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }}
+  h2, h3 {{ scroll-margin-top: 22px; }}  /* 從目錄跳過來時不要貼齊視窗上緣 */
   p {{ margin: 14px 0; }}
   a {{ color: var(--accent); }}
   code {{ font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
@@ -222,8 +251,35 @@ PAGE = """<!doctype html>
   <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
 {content}
 </div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav>{toc}</nav>
+</aside>
 <div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
 <script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {{
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => {{ if (h.getBoundingClientRect().top <= line) idx = i; }});
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {{
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }}
+}}
+addEventListener("scroll", syncToc, {{ passive: true }});
+addEventListener("resize", syncToc);
+syncToc();
+
 // 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
 const lb = document.getElementById("lightbox");
 const lbImg = lb.querySelector("img");
@@ -296,11 +352,15 @@ def build(ch: dict) -> tuple[Path, int]:
     md = re.sub(r"^# .*\n", "", md, count=1)          # h1 交給頁面標題
     md = targets.filter_blocks(md, "web")
     md = targets.absolute_links(md, ch["dir"], f"../chapters/{ch['dir']}")
-    content, runnable = render(md, ch.get("web_static", []))
+    content, runnable, toc = render(md, ch.get("web_static", []))
+    links = "".join(
+        f'<a class="item lv{lv}" href="#{hid}" data-id="{hid}">{html.escape(title)}</a>'
+        for lv, hid, title in toc
+    )
     OUT.mkdir(exist_ok=True)
     dst = OUT / f"{ch['dir']}.html"
     dst.write_text(PAGE.format(title=ch["title"], unit=ch["unit"], accent=ch["accent"],
-                               content=content, pyodide=PYODIDE), encoding="utf-8")
+                               content=content, toc=links, pyodide=PYODIDE), encoding="utf-8")
     return dst, runnable
 
 

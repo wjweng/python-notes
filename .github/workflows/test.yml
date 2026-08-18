@@ -10,6 +10,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - name: 風格與命名檢查
+        run: python tools/check_style.py --quiet
+
+      - name: README 章節表與 chapters.json 同步
+        run: python tools/build_readme.py --check
+
       - name: 逐支執行所有章節範例
         run: |
           fail=0

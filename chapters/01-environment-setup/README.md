@@ -11,7 +11,7 @@
 > 我替每一章都製作了 [Colab 版](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb)，用 Google 帳號登入就能改程式碼、按執行看結果，或複製一份到你的雲端硬碟中，這樣你所修改的東西就能保留在自己的儲存空間中，什麼都不用裝。
 <!-- /only -->
 <!-- only:github,colab -->
-> 這些內容也做了一份[網頁互動版](https://wjweng.github.io/python-notes/)，不用登入，開啟網頁就可以觀看與執行。
+> 這一章也做了一份[網頁互動版](https://wjweng.github.io/python-notes/web/01-environment-setup.html)，不用登入，開啟網頁就可以觀看與執行。
 <!-- /only -->
 > 等你想在自己電腦上跑程式時，再回來看這章。
 
