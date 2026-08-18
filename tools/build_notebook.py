@@ -9,10 +9,14 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import targets  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "notebooks"
 
 FENCE = re.compile(r"^```(\w*)\n(.*?)^```", re.S | re.M)
+
 
 
 def cells(md: str) -> list[dict]:
@@ -38,8 +42,11 @@ def cells(md: str) -> list[dict]:
 
 def build(chapter: dict) -> Path:
     src = ROOT / "chapters" / chapter["dir"] / "README.md"
+    md = src.read_text(encoding="utf-8")
+    md = targets.filter_blocks(md, "colab")
+    md = targets.absolute_links(md, chapter["dir"], f"{targets.RAW}/{chapter['dir']}")
     nb = {
-        "cells": cells(src.read_text(encoding="utf-8")),
+        "cells": cells(md),
         "metadata": {
             "colab": {"name": chapter["dir"], "provenance": []},
             "kernelspec": {"name": "python3", "display_name": "Python 3"},

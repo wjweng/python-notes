@@ -38,14 +38,14 @@
     {
       "id": 6,
       "name": "檔案與資料處理",
-      "accent": "#4fc1ff",
+      "accent": "#9d7cd8",
       "days": "27-29",
       "desc": "路徑、CSV、Pandas"
     },
     {
       "id": 7,
       "name": "圖形介面",
-      "accent": "#b5cea8",
+      "accent": "#7ee787",
       "days": "30-32",
       "desc": "tkinter 元件與版面配置"
     },
@@ -61,12 +61,10 @@
     {
       "num": "01",
       "unit": 1,
-      "dir": "01-把開發環境準備好",
+      "dir": "01-environment-setup",
       "title": "把開發環境準備好",
       "snippet": "uv python install 3.13\nuv init hello-python\nuv run main.py\n\ndef greeting(name: str = \"Python\") -> str:\n    return f\"Hello, {name}!\"\n\nprint(greeting())\n# Hello, Python!",
-      "web_static": [
-        "def env_info"
-      ]
+      "web_static": []
     }
   ]
 }

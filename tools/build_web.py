@@ -10,6 +10,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import targets  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "web"
 PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"
@@ -21,10 +24,18 @@ STATIC_LANGS = {"bash", "powershell", "text", "", None}
 # --------------------------------------------------------------------------
 # 極簡 Markdown 轉 HTML（只支援本專案用得到的語法）
 # --------------------------------------------------------------------------
+CHAPTER_DIR = ""  # build() 每次設定，圖片的相對路徑要靠它還原
+
+
 def inline(s: str) -> str:
     s = html.escape(s)
     s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
     s = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", s)
+    # 圖片要先於連結處理，否則 ![alt](src) 會被當成前面多一個驚嘆號的連結。
+    # 相對路徑已由 targets.absolute_links() 轉成 ../chapters/... 的形式。
+    s = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)",
+               r'<img src="\2" alt="\1" title="點一下放大" loading="lazy">'
+               r'<span class="cap">\1</span>', s)
     s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
     return s
 
@@ -77,7 +88,8 @@ def render(md: str, static_marks: list[str]) -> tuple[str, int]:
                 i += 1
             th = "".join(f"<th>{inline(c)}</th>" for c in head)
             tb = "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in rows)
-            out.append(f"<table><thead><tr>{th}</tr></thead><tbody>{tb}</tbody></table>")
+            out.append(f'<div class="tablewrap"><table><thead><tr>{th}</tr></thead>'
+                       f"<tbody>{tb}</tbody></table></div>")
             continue
 
         # 標題
@@ -88,9 +100,11 @@ def render(md: str, static_marks: list[str]) -> tuple[str, int]:
             i += 1
             continue
 
-        # 分隔線
+        # 分隔線。h2 本身就有上框線，緊接著 ## 的話會變成兩條，跳過不畫。
         if re.match(r"^-{3,}$", line.strip()):
-            out.append("<hr>")
+            nxt = next((l for l in lines[i + 1:] if l.strip()), "")
+            if not re.match(r"^##\s", nxt):
+                out.append("<hr>")
             i += 1
             continue
 
@@ -157,7 +171,8 @@ PAGE = """<!doctype html>
   pre.static {{ background: #010409; border: 1px solid var(--line); border-radius: 8px;
                 padding: 14px 16px; overflow-x: auto; margin: 16px 0; }}
   pre.static code {{ background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }}
-  table {{ border-collapse: collapse; width: 100%; margin: 18px 0; font-size: 15px; }}
+  .tablewrap {{ overflow-x: auto; margin: 18px 0; }}
+  table {{ border-collapse: collapse; width: 100%; font-size: 15px; }}
   th, td {{ border: 1px solid var(--line); padding: 9px 13px; text-align: left; }}
   th {{ background: var(--panel); font-weight: 700; }}
   blockquote {{ border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
@@ -165,6 +180,21 @@ PAGE = """<!doctype html>
   ul, ol {{ padding-left: 26px; }}
   li {{ margin: 6px 0; }}
   hr {{ border: 0; border-top: 1px solid var(--line); margin: 38px 0; }}
+  img {{ max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }}
+  .cap {{ display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }}
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox {{ position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }}
+  #lightbox.on {{ display: grid; }}
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img {{ max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }}
+  #lightbox .hint {{ position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }}
   .demo {{ border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }}
   .head {{ background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
            display: flex; justify-content: space-between; align-items: center; }}
@@ -192,6 +222,27 @@ PAGE = """<!doctype html>
   <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
 {content}
 </div>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {{
+  img.addEventListener("click", () => {{
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  }});
+}});
+function closeLightbox() {{
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => {{ if (e.key === "Escape") closeLightbox(); }});
+</script>
 <script src="{pyodide}"></script>
 <script>
 let pyodide = null;
@@ -239,9 +290,12 @@ def load_chapters() -> list[dict]:
 
 
 def build(ch: dict) -> tuple[Path, int]:
+    global CHAPTER_DIR
+    CHAPTER_DIR = ch["dir"]
     md = (ROOT / "chapters" / ch["dir"] / "README.md").read_text(encoding="utf-8")
     md = re.sub(r"^# .*\n", "", md, count=1)          # h1 交給頁面標題
-    md = re.sub(r"\n## 本章程式碼\n.*$", "", md, flags=re.S)  # 站內導覽連結不進網頁版
+    md = targets.filter_blocks(md, "web")
+    md = targets.absolute_links(md, ch["dir"], f"../chapters/{ch['dir']}")
     content, runnable = render(md, ch.get("web_static", []))
     OUT.mkdir(exist_ok=True)
     dst = OUT / f"{ch['dir']}.html"
