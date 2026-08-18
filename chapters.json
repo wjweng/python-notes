@@ -63,7 +63,7 @@
       "unit": 1,
       "dir": "01-environment-setup",
       "title": "把開發環境準備好",
-      "snippet": "uv python install 3.13\nuv init hello-python\nuv run main.py\n\ndef greeting(name: str = \"Python\") -> str:\n    return f\"Hello, {name}!\"\n\nprint(greeting())\n# Hello, Python!",
+      "snippet": "uv python install 3.13\nuv init --no-package hello-python\nuv run main.py\n\ndef greeting(name: str = \"Python\") -> str:\n    return f\"Hello, {name}!\"\n\nprint(greeting())\n# Hello, Python!",
       "web_static": []
     }
   ]
