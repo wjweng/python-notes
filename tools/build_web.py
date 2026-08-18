@@ -169,23 +169,43 @@ PAGE = """<!doctype html>
   .wrap {{ max-width: 780px; margin: 0 auto; }}
   /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
      否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
-  #toc {{ display: none; }}
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn {{ position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }}
+  #tocbtn:hover {{ border-color: var(--accent); }}
+  #tocbtn .ic {{ color: var(--accent); font-size: 15px; line-height: 1; }}
+  #tocbtn .now {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }}
+  #tocveil {{ position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }}
+  #toc {{ position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }}
+  body.toc-open #toc {{ transform: none; }}
+  body.toc-open #tocveil {{ display: block; }}
+  #toc .home {{ display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }}
+  #toc .home:hover {{ color: var(--accent); border-color: var(--accent); }}
+  #toc .label {{ flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }}
+  #toc nav {{ overflow-y: auto; min-height: 0; }}
+  #toc a.item {{ display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }}
+  #toc a.item:hover {{ color: var(--text); }}
+  #toc a.lv3 {{ padding-left: 24px; font-size: 12.5px; }}
+  #toc a.item.on {{ color: var(--accent); border-left-color: var(--accent); font-weight: 500; }}
   @media (min-width: 1320px) {{
-    #toc {{ display: flex; flex-direction: column; position: fixed; top: 0; left: 18px;
-            width: 244px; height: 100vh; padding: 30px 0 40px; z-index: 10; }}
-    #toc .home {{ display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
-                  text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
-                  padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }}
-    #toc .home:hover {{ color: var(--accent); border-color: var(--accent); }}
-    #toc .label {{ flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
-                   margin-bottom: 10px; }}
-    #toc nav {{ overflow-y: auto; min-height: 0; }}
-    #toc a.item {{ display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
-                   text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
-                   transition: color .15s, border-color .15s; }}
-    #toc a.item:hover {{ color: var(--text); }}
-    #toc a.lv3 {{ padding-left: 24px; font-size: 12.5px; }}
-    #toc a.item.on {{ color: var(--accent); border-left-color: var(--accent); font-weight: 500; }}
+    #tocbtn, #tocveil {{ display: none; }}
+    #toc {{ left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }}
   }}
   .unit {{ color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }}
   h1 {{ font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }}
@@ -251,6 +271,10 @@ PAGE = """<!doctype html>
   <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
 {content}
 </div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
 <aside id="toc">
   <a class="home" href="../index.html">← 回首頁</a>
   <div class="label">本章目錄</div>
@@ -270,12 +294,28 @@ function syncToc() {{
   // 捲到最底時，直接標最後一節，否則永遠讀不到
   if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
   tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
   const cur = tocLinks[idx];
   const box = cur.parentElement;
   if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {{
     box.scrollTop = cur.offsetTop - box.clientHeight / 2;
   }}
 }}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {{
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => {{ if (e.key === "Escape") setDrawer(false); }});
+
 addEventListener("scroll", syncToc, {{ passive: true }});
 addEventListener("resize", syncToc);
 syncToc();
