@@ -285,7 +285,7 @@ def check_naming() -> list[str]:
         if any(part.startswith(".") or part == "__pycache__" for part in p.parts):
             continue  # 點開頭的設定檔與資料夾（.github、.gitignore）不在此規則內
         name = p.name if p.is_dir() else p.stem
-        if not slug.fullmatch(name) and name not in {"README", "LICENSE", "CLAUDE"}:
+        if not slug.fullmatch(name) and name not in {"README", "LICENSE", "CLAUDE", "AGENTS"}:
             hits.append(f"{p.relative_to(ROOT)}　←　改成英文小寫 slug（例：01-environment-setup）")
     return hits
 
