@@ -65,6 +65,14 @@
       "title": "把開發環境準備好",
       "snippet": "uv python install 3.13\nuv init --no-package hello-python\nuv run main.py\n\ndef greeting(name: str = \"Python\") -> str:\n    return f\"Hello, {name}!\"\n\nprint(greeting())\n# Hello, Python!",
       "web_static": []
+    },
+    {
+      "num": "02",
+      "unit": 1,
+      "dir": "02-variables-and-types",
+      "title": "註解、變數與資料型態",
+      "snippet": "# 這是單行註解\nstring_data = \"Hello World!\"\nprint(type(string_data))\n# <class 'str'>\n\nage = int(input(\"How old are you? \"))\nprint(f\"Next year: {age + 1}\")",
+      "web_static": []
     }
   ]
 }

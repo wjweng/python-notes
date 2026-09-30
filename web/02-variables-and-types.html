@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>註解、變數與資料型態 — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #4ec9b0; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元一・入門</div>
+  <h1>註解、變數與資料型態</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<h2 id="s1">註解</h2>
+<p>註解是 Python 直譯器會跳過不執行的部分，但它可以補充說明程式背後的設計思維、摘要、或是預期會產生什麼樣的結果，它可以讓程式的可讀性更高，尤其是經過一段時間後再回來閱讀，或是對於多人合作開發的大型程式，都可以加速對程式的理解。</p>
+<p>程式註解的方法有以下三種：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="9"># 這是單行註解
+
+&#x27;&#x27;&#x27;
+這是多行註解
+&#x27;&#x27;&#x27;
+
+&quot;&quot;&quot;
+這也是多行註解
+&quot;&quot;&quot;</textarea><pre id="out0"></pre></div>
+<p>嚴格來說，後面兩種三引號的寫法其實是字串，並不是真正的註解：Python 還是會讀到它，只是沒有把它存進變數或拿來使用，所以對程式的執行不會有任何影響，也因此常被拿來當作多行註解。三引號字串如果放在函數的第一行，還會變成這個函數的說明文件（docstring），之後講到函數時會再看到。</p>
+<p><code>#</code> 也可以接在程式碼的後面，這種寫法叫做行尾註解，<code>#</code> 之後的內容同樣不會被執行：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="3">print(&quot;Hello World!&quot;)  # 這是行尾註解</textarea><pre id="out1"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>Hello World!</code></pre>
+<p>單行註解的方式除了可手動打字外，也可將輸入位置停在想要註解的行數上，按下 <code>Ctrl + /</code> 快速鍵（macOS 是 <code>Cmd + /</code>）來達成；因此，若要達成多行註解，也可將要註解的行數反白，再按下 <code>Ctrl + /</code> 完成多個單行註解。</p>
+<h2 id="s2">print() 函數基本功能</h2>
+<p>可將資料打印輸出，例如以下程式可在 VS Code 下方的終端機印出「Hello World!」字串，以便開發者初步測試程式的正確性。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="3"># print to console
+print(&quot;Hello World!&quot;)</textarea><pre id="out2"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>Hello World!</code></pre>
+<h2 id="s3">input() 函數基本功能</h2>
+<p>可接收使用者輸入的資料，例如程式執行到以下的函數便會停下來等待使用者輸入後再往下執行。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="3"># input function
+input(&quot;What&#x27;s your name? &quot;)</textarea><pre id="out3"></pre></div>
+<p>執行結果如下，前方的「What&#x27;s your name?」為程式輸出，「WJ」為使用者輸入。提示文字的最後多留了一個空格，使用者輸入的內容才不會跟提示文字黏在一起。</p>
+<pre class="static"><code>What&#x27;s your name? WJ</code></pre>
+<h2 id="s4">變數與資料型態</h2>
+<p>變數為程式暫存資料的地方，例如前方的 Hello World 程式，我們可用一個變數儲存要打印的字串資料，再用 print() 函數將此字串打印出來，此變數的型態便為字串資料型態。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="4"># string
+string_data = &quot;Hello World!&quot;
+print(string_data)
+print(type(string_data))</textarea><pre id="out4"></pre></div>
+<p>type() 函數可回傳變數的資料型態。</p>
+<pre class="static"><code>Hello World!
+&lt;class &#x27;str&#x27;&gt;</code></pre>
+<p>其它常見的基本資料型態還有整數、浮點數、布林值等。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="4"># integer
+integer_data = 123 + 456
+print(integer_data)
+print(type(integer_data))</textarea><pre id="out5"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="4"># float
+float_data = 3.1415926
+print(float_data)
+print(type(float_data))</textarea><pre id="out6"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="4"># boolean
+bool_data = True
+print(bool_data)
+print(type(bool_data))</textarea><pre id="out7"></pre></div>
+<p>輸出結果：</p>
+<pre class="static"><code>579
+&lt;class &#x27;int&#x27;&gt;
+3.1415926
+&lt;class &#x27;float&#x27;&gt;
+True
+&lt;class &#x27;bool&#x27;&gt;</code></pre>
+<p>更精確地說，資料型態是跟著「值」走的，而不是跟著變數。同一個變數可以先放整數，之後再改放字串，它的型態也會跟著改變：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn8" onclick="run(8)" disabled>執行</button></div><textarea id="code8" spellcheck="false" rows="4">data = 5
+print(type(data))
+data = &quot;five&quot;
+print(type(data))</textarea><pre id="out8"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>&lt;class &#x27;int&#x27;&gt;
+&lt;class &#x27;str&#x27;&gt;</code></pre>
+<p>須注意雖然 Python 宣告變數時不用指定變數型態，但當此變數存放了整數資料，它便是整數的資料型態，存放了字串資料，它便是字串的資料型態，因此在某些情境下，兩種變數是不能混用的，例如：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3">integer_data = 123 + 456
+print(&quot;Integer data is &quot; + integer_data)</textarea><pre id="out9"></pre></div>
+<p>此時 print() 函數內前方是字串資料，後方是整數型態的變數，兩者相加便會產生錯誤，錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>TypeError: can only concatenate str (not &quot;int&quot;) to str</code></pre>
+<p>為了解決此問題，可透過強制資料型態的轉換，讓兩者型態一致：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3"># type conversion
+string_integer_data = str(integer_data)
+print(&quot;Integer data is &quot; + string_integer_data)</textarea><pre id="out10"></pre></div>
+<p>另一種更簡潔的方式是使用 f-string 將字串格式化：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="3"># f-string
+print(f&quot;Integer data is {integer_data}&quot;)</textarea><pre id="out11"></pre></div>
+<p>以上兩種方式都可以得到正確的結果：</p>
+<pre class="static"><code>Integer data is 579</code></pre>
+<h3 id="s5">變數的命名規則</h3>
+<p>前面的範例中，我們已經自己取了 <code>string_data</code>、<code>integer_data</code> 這些變數名稱。變數的名字大致可以自由決定，但有幾條規則要遵守：</p>
+<ul><li>由字母、數字、底線 <code>_</code> 組成，而且<strong>不能用數字開頭</strong>，例如 <code>1data</code> 會出現錯誤（中文字其實也算字母，但習慣上還是用英文）</li><li>中間不能有空格或 <code>-</code>，例如 <code>my-name</code> 會被當成 <code>my</code> 減去 <code>name</code></li><li>不能使用 Python 保留的關鍵字，例如 <code>class</code>、<code>if</code>、<code>for</code></li><li><strong>英文大小寫視為不同的名字</strong>，<code>name</code> 與 <code>Name</code> 是兩個不同的變數</li></ul>
+<p>大小寫這一條也適用在 Python 內建的名稱上，例如布林值要寫成 <code>True</code>，寫成小寫的 <code>true</code> 會被當成一個沒有定義過的變數：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">print(true)</textarea><pre id="out12"></pre></div>
+<p>錯誤訊息的最後一行如下，Python 也會提示你是不是要寫 <code>True</code>：</p>
+<pre class="static"><code>NameError: name &#x27;true&#x27; is not defined. Did you mean: &#x27;True&#x27;?</code></pre>
+<p>多個英文單字組成的變數名稱，習慣上用底線連接，例如 <code>string_data</code>，這是 Python 社群通用的寫法。</p>
+<h3 id="s6">input() 拿到的都是字串</h3>
+<p>了解型態轉換之後，我們再回頭看前面的 input() 函數。不論使用者輸入的是什麼，input() 拿到的一律是字串，就算輸入的是數字也一樣，因此直接拿來計算，會產生和前面一樣的錯誤：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3">age = input(&quot;How old are you? &quot;)
+print(age + 1)</textarea><pre id="out13"></pre></div>
+<p>輸入 <code>18</code> 之後，錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>TypeError: can only concatenate str (not &quot;int&quot;) to str</code></pre>
+<p>這時就要用 int() 把它轉成整數，再拿來計算：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn14" onclick="run(14)" disabled>執行</button></div><textarea id="code14" spellcheck="false" rows="3">age = int(input(&quot;How old are you? &quot;))
+print(age + 1)</textarea><pre id="out14"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>How old are you? 18
+19</code></pre>
+<p>要注意的是，int() 只能轉換看起來就是整數的字串，如果輸入的是 <code>十八</code> 或 <code>18.5</code>，int() 都沒辦法轉換，會出現 <code>ValueError</code> 錯誤：</p>
+<pre class="static"><code>ValueError: invalid literal for int() with base 10: &#x27;18.5&#x27;</code></pre>
+<p>帶小數點的字串，可以先用 float() 轉成浮點數，再用 int() 轉成整數，小數的部分會直接捨去：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn15" onclick="run(15)" disabled>執行</button></div><textarea id="code15" spellcheck="false" rows="3">print(int(float(&quot;3.5&quot;)))</textarea><pre id="out15"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>3</code></pre>
+<p>至於使用者輸入了無法轉換的內容時，要怎麼讓程式不要中斷，之後講到異常處理時再來說明。</p>
+<hr>
+<p>這一章我們學會了用註解替程式加上說明，用 print() 與 input() 讓程式和使用者互動，也認識了字串、整數、浮點數與布林值這四種基本資料型態。型態不同的資料不能直接混在一起運算，遇到型態不合的錯誤時，可以先用 type() 確認它是什麼型態，再決定要怎麼轉換。</p>
+<h2 id="s7">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/02-variables-and-types/code/"><code>GitHub</code></a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/02-variables-and-types.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">註解</a><a class="item lv2" href="#s2" data-id="s2">print() 函數基本功能</a><a class="item lv2" href="#s3" data-id="s3">input() 函數基本功能</a><a class="item lv2" href="#s4" data-id="s4">變數與資料型態</a><a class="item lv3" href="#s5" data-id="s5">變數的命名規則</a><a class="item lv3" href="#s6" data-id="s6">input() 拿到的都是字串</a><a class="item lv2" href="#s7" data-id="s7">本章程式碼</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>

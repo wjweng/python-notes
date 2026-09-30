@@ -11,6 +11,7 @@
 | # | 章節 | GitHub | Colab | 網頁 |
 | :- | :--- | :-: | :-: | :-: |
 | 01 | 把開發環境準備好 | [📖](./chapters/01-environment-setup/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/01-environment-setup.html) |
+| 02 | 註解、變數與資料型態 | [📖](./chapters/02-variables-and-types/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/02-variables-and-types.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/02-variables-and-types.html) |
 
 <!-- chapters:end -->
 

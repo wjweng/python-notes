@@ -339,13 +339,29 @@ async function run(i) {
   out.className = "";
   out.textContent = "";
   try {
-    pyodide.setStdout({ batched: (s) => { out.textContent += s + "\n"; } });
-    pyodide.setStderr({ batched: (s) => { out.textContent += s + "\n"; } });
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
     await pyodide.runPythonAsync(document.getElementById("code" + i).value);
     if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
   } catch (e) {
     out.className = "err";
-    out.textContent = String(e).split("\n").slice(-6).join("\n");
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
   }
 }
 boot();
