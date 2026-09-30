@@ -126,12 +126,10 @@
 &quot;&quot;&quot;
 這也是多行註解
 &quot;&quot;&quot;</textarea><pre id="out0"></pre></div>
-<p>嚴格來說，後面兩種三引號的寫法其實是字串，並不是真正的註解：Python 還是會讀到它，只是沒有把它存進變數或拿來使用，所以對程式的執行不會有任何影響，也因此常被拿來當作多行註解。三引號字串如果放在函數的第一行，還會變成這個函數的說明文件（docstring），之後講到函數時會再看到。</p>
+<p>嚴格來說，後面兩種三引號的寫法其實是字串，並不是真正的註解，Python 還是會讀到它，只是沒有把它存進變數或拿來使用，所以對程式的執行不會有任何影響，也因此常被拿來當作多行註解。三引號字串如果放在函數的第一行，還會變成這個函數的說明文件（docstring），之後講到函數時會再看到。</p>
 <p><code>#</code> 也可以接在程式碼的後面，這種寫法叫做行尾註解，<code>#</code> 之後的內容同樣不會被執行：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="3">print(&quot;Hello World!&quot;)  # 這是行尾註解</textarea><pre id="out1"></pre></div>
-<p>執行結果：</p>
-<pre class="static"><code>Hello World!</code></pre>
-<p>單行註解的方式除了可手動打字外，也可將輸入位置停在想要註解的行數上，按下 <code>Ctrl + /</code> 快速鍵（macOS 是 <code>Cmd + /</code>）來達成；因此，若要達成多行註解，也可將要註解的行數反白，再按下 <code>Ctrl + /</code> 完成多個單行註解。</p>
+<p>單行註解的方式除了可手動打字外，在 VS Code 裡面也可將輸入位置停在想要註解的行數上，按下 <code>Ctrl + /</code> 快速鍵（macOS 是 <code>Cmd + /</code>）來達成；因此，若要達成多行註解，也可將要註解的行數反白，再按下 <code>Ctrl + /</code> 完成多個單行註解。</p>
 <h2 id="s2">print() 函數基本功能</h2>
 <p>可將資料打印輸出，例如以下程式可在 VS Code 下方的終端機印出「Hello World!」字串，以便開發者初步測試程式的正確性。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="3"># print to console
@@ -142,8 +140,8 @@ print(&quot;Hello World!&quot;)</textarea><pre id="out2"></pre></div>
 <p>可接收使用者輸入的資料，例如程式執行到以下的函數便會停下來等待使用者輸入後再往下執行。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="3"># input function
 input(&quot;What&#x27;s your name? &quot;)</textarea><pre id="out3"></pre></div>
-<p>執行結果如下，前方的「What&#x27;s your name?」為程式輸出，「WJ」為使用者輸入。提示文字的最後多留了一個空格，使用者輸入的內容才不會跟提示文字黏在一起。</p>
-<pre class="static"><code>What&#x27;s your name? WJ</code></pre>
+<p>執行結果如下，前方的「What&#x27;s your name?」為程式輸出，「weijie」為使用者輸入。提示文字的最後多留了一個空格，使用者輸入的內容才不會跟提示文字黏在一起。</p>
+<pre class="static"><code>What&#x27;s your name? weijie</code></pre>
 <h2 id="s4">變數與資料型態</h2>
 <p>變數為程式暫存資料的地方，例如前方的 Hello World 程式，我們可用一個變數儲存要打印的字串資料，再用 print() 函數將此字串打印出來，此變數的型態便為字串資料型態。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="4"># string
@@ -187,22 +185,26 @@ print(&quot;Integer data is &quot; + integer_data)</textarea><pre id="out9"></pr
 <p>此時 print() 函數內前方是字串資料，後方是整數型態的變數，兩者相加便會產生錯誤，錯誤訊息的最後一行如下：</p>
 <pre class="static"><code>TypeError: can only concatenate str (not &quot;int&quot;) to str</code></pre>
 <p>為了解決此問題，可透過強制資料型態的轉換，讓兩者型態一致：</p>
-<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3"># type conversion
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="5">integer_data = 123 + 456
+
+# type conversion
 string_integer_data = str(integer_data)
 print(&quot;Integer data is &quot; + string_integer_data)</textarea><pre id="out10"></pre></div>
 <p>另一種更簡潔的方式是使用 f-string 將字串格式化：</p>
-<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="3"># f-string
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="4">integer_data = 123 + 456
+
+# f-string
 print(f&quot;Integer data is {integer_data}&quot;)</textarea><pre id="out11"></pre></div>
 <p>以上兩種方式都可以得到正確的結果：</p>
 <pre class="static"><code>Integer data is 579</code></pre>
 <h3 id="s5">變數的命名規則</h3>
-<p>前面的範例中，我們已經自己取了 <code>string_data</code>、<code>integer_data</code> 這些變數名稱。變數的名字大致可以自由決定，但有幾條規則要遵守：</p>
+<p>前面的範例中，我們建立了 <code>string_data</code>、<code>integer_data</code> 等變數。變數的名字大致可以自由決定，但有幾條規則要遵守：</p>
 <ul><li>由字母、數字、底線 <code>_</code> 組成，而且<strong>不能用數字開頭</strong>，例如 <code>1data</code> 會出現錯誤（中文字其實也算字母，但習慣上還是用英文）</li><li>中間不能有空格或 <code>-</code>，例如 <code>my-name</code> 會被當成 <code>my</code> 減去 <code>name</code></li><li>不能使用 Python 保留的關鍵字，例如 <code>class</code>、<code>if</code>、<code>for</code></li><li><strong>英文大小寫視為不同的名字</strong>，<code>name</code> 與 <code>Name</code> 是兩個不同的變數</li></ul>
 <p>大小寫這一條也適用在 Python 內建的名稱上，例如布林值要寫成 <code>True</code>，寫成小寫的 <code>true</code> 會被當成一個沒有定義過的變數：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">print(true)</textarea><pre id="out12"></pre></div>
 <p>錯誤訊息的最後一行如下，Python 也會提示你是不是要寫 <code>True</code>：</p>
 <pre class="static"><code>NameError: name &#x27;true&#x27; is not defined. Did you mean: &#x27;True&#x27;?</code></pre>
-<p>多個英文單字組成的變數名稱，習慣上用底線連接，例如 <code>string_data</code>，這是 Python 社群通用的寫法。</p>
+<p>多個英文單字組成的變數名稱，在 Python 習慣上用底線連接，例如 <code>string_data</code>。</p>
 <h3 id="s6">input() 拿到的都是字串</h3>
 <p>了解型態轉換之後，我們再回頭看前面的 input() 函數。不論使用者輸入的是什麼，input() 拿到的一律是字串，就算輸入的是數字也一樣，因此直接拿來計算，會產生和前面一樣的錯誤：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3">age = input(&quot;How old are you? &quot;)
@@ -225,7 +227,7 @@ print(age + 1)</textarea><pre id="out14"></pre></div>
 <hr>
 <p>這一章我們學會了用註解替程式加上說明，用 print() 與 input() 讓程式和使用者互動，也認識了字串、整數、浮點數與布林值這四種基本資料型態。型態不同的資料不能直接混在一起運算，遇到型態不合的錯誤時，可以先用 type() 確認它是什麼型態，再決定要怎麼轉換。</p>
 <h2 id="s7">本章程式碼</h2>
-<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/02-variables-and-types/code/"><code>GitHub</code></a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/02-variables-and-types.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/02-variables-and-types/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/02-variables-and-types.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
 </div>
 <button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
   <span class="ic">☰</span><span class="now">本章目錄</span>

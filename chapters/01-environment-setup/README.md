@@ -311,7 +311,7 @@ code .
 
 ## 本章程式碼
 
-- [`GitHub`](./code/) — 本章所有可執行範例
+- [GitHub](./code/) — 本章所有可執行範例
 <!-- only:github,web -->
 - [在 Colab 開啟](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/01-environment-setup.ipynb) — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟
 <!-- /only -->

@@ -154,6 +154,9 @@ def check_cross_links(text: str, chapter_dir: str) -> list[str]:
     for m in re.finditer(r"colab\.research\.google\.com/\S*?/notebooks/(\S*?)\.ipynb", text):
         if m.group(1) != chapter_dir:
             hits.append(f"Colab 連結指到 {m.group(1)}.ipynb，應該是 {chapter_dir}.ipynb")
+    # 連結文字不要包成程式碼（2026-09-30 weijie 校稿：[`GitHub`] 改成 [GitHub]，拿掉底色）
+    for m in re.finditer(r"(?<!!)\[`[^`\]]+`\]\(", text):
+        hits.append(f"連結文字不要加程式碼格式：{m.group(0)[:-1]}")
     return hits
 
 

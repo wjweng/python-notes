@@ -18,7 +18,7 @@
 """
 ```
 
-嚴格來說，後面兩種三引號的寫法其實是字串，並不是真正的註解：Python 還是會讀到它，只是沒有把它存進變數或拿來使用，所以對程式的執行不會有任何影響，也因此常被拿來當作多行註解。三引號字串如果放在函數的第一行，還會變成這個函數的說明文件（docstring），之後講到函數時會再看到。
+嚴格來說，後面兩種三引號的寫法其實是字串，並不是真正的註解，Python 還是會讀到它，只是沒有把它存進變數或拿來使用，所以對程式的執行不會有任何影響，也因此常被拿來當作多行註解。三引號字串如果放在函數的第一行，還會變成這個函數的說明文件（docstring），之後講到函數時會再看到。
 
 `#` 也可以接在程式碼的後面，這種寫法叫做行尾註解，`#` 之後的內容同樣不會被執行：
 
@@ -26,13 +26,7 @@
 print("Hello World!")  # 這是行尾註解
 ```
 
-執行結果：
-
-```
-Hello World!
-```
-
-單行註解的方式除了可手動打字外，也可將輸入位置停在想要註解的行數上，按下 `Ctrl + /` 快速鍵（macOS 是 `Cmd + /`）來達成；因此，若要達成多行註解，也可將要註解的行數反白，再按下 `Ctrl + /` 完成多個單行註解。
+單行註解的方式除了可手動打字外，在 VS Code 裡面也可將輸入位置停在想要註解的行數上，按下 `Ctrl + /` 快速鍵（macOS 是 `Cmd + /`）來達成；因此，若要達成多行註解，也可將要註解的行數反白，再按下 `Ctrl + /` 完成多個單行註解。
 
 ## print() 函數基本功能
 
@@ -58,10 +52,10 @@ Hello World!
 input("What's your name? ")
 ```
 
-執行結果如下，前方的「What's your name?」為程式輸出，「WJ」為使用者輸入。提示文字的最後多留了一個空格，使用者輸入的內容才不會跟提示文字黏在一起。
+執行結果如下，前方的「What's your name?」為程式輸出，「weijie」為使用者輸入。提示文字的最後多留了一個空格，使用者輸入的內容才不會跟提示文字黏在一起。
 
 ```
-What's your name? WJ
+What's your name? weijie
 ```
 
 ## 變數與資料型態
@@ -148,6 +142,8 @@ TypeError: can only concatenate str (not "int") to str
 為了解決此問題，可透過強制資料型態的轉換，讓兩者型態一致：
 
 ```python
+integer_data = 123 + 456
+
 # type conversion
 string_integer_data = str(integer_data)
 print("Integer data is " + string_integer_data)
@@ -156,6 +152,8 @@ print("Integer data is " + string_integer_data)
 另一種更簡潔的方式是使用 f-string 將字串格式化：
 
 ```python
+integer_data = 123 + 456
+
 # f-string
 print(f"Integer data is {integer_data}")
 ```
@@ -168,7 +166,7 @@ Integer data is 579
 
 ### 變數的命名規則
 
-前面的範例中，我們已經自己取了 `string_data`、`integer_data` 這些變數名稱。變數的名字大致可以自由決定，但有幾條規則要遵守：
+前面的範例中，我們建立了 `string_data`、`integer_data` 等變數。變數的名字大致可以自由決定，但有幾條規則要遵守：
 
 - 由字母、數字、底線 `_` 組成，而且**不能用數字開頭**，例如 `1data` 會出現錯誤（中文字其實也算字母，但習慣上還是用英文）
 - 中間不能有空格或 `-`，例如 `my-name` 會被當成 `my` 減去 `name`
@@ -187,7 +185,7 @@ print(true)
 NameError: name 'true' is not defined. Did you mean: 'True'?
 ```
 
-多個英文單字組成的變數名稱，習慣上用底線連接，例如 `string_data`，這是 Python 社群通用的寫法。
+多個英文單字組成的變數名稱，在 Python 習慣上用底線連接，例如 `string_data`。
 
 ### input() 拿到的都是字串
 
@@ -244,7 +242,7 @@ print(int(float("3.5")))
 
 ## 本章程式碼
 
-- [`GitHub`](./code/) — 本章所有可執行範例
+- [GitHub](./code/) — 本章所有可執行範例
 <!-- only:github,web -->
 - [在 Colab 開啟](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/02-variables-and-types.ipynb) — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟
 <!-- /only -->
