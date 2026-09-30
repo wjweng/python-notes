@@ -73,6 +73,14 @@
       "title": "註解、變數與資料型態",
       "snippet": "# 這是單行註解\nstring_data = \"Hello World!\"\nprint(type(string_data))\n# <class 'str'>\n\nage = int(input(\"How old are you? \"))\nprint(f\"Next year: {age + 1}\")",
       "web_static": []
+    },
+    {
+      "num": "03",
+      "unit": 1,
+      "dir": "03-arithmetic",
+      "title": "基本數學運算",
+      "snippet": "print(8 / 2)         # 4.0\nprint(5 // 2, 5 % 2) # 2 1\nprint(2 ** 3 ** 2)   # 512\nprint(0.1 + 0.2)\n# 0.30000000000000004",
+      "web_static": []
     }
   ]
 }

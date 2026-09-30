@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基本數學運算 — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #4ec9b0; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元一・入門</div>
+  <h1>基本數學運算</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<h2 id="s1">四則運算</h2>
+<p>Python 的四則運算透過「+」（加）、「-」（減）、「*」（乘）、「/」（除）等算術運算子，或是「+=」、「-=」、「*=」、「/=」等指派運算子來達成。這裡的「+=」若寫成「a += b」，即等同於「a = a + b」的意思。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="5"># addition
+integer_x = 1 + 2          # integer_x = 3
+integer_x = integer_x + 1  # integer_x = 3 + 1 = 4
+integer_x += 1             # integer_x = 4 + 1 = 5
+print(integer_x)</textarea><pre id="out0"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="5"># subtraction
+integer_x = 5 - 2          # integer_x = 5 - 2 = 3
+integer_x = integer_x - 1  # integer_x = 3 - 1 = 2
+integer_x -= 1             # integer_x = 2 - 1 = 1
+print(integer_x)</textarea><pre id="out1"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="5"># multiplication
+integer_x = 1 * 2          # integer_x = 1 * 2 = 2
+integer_x = integer_x * 2  # integer_x = 2 * 2 = 4
+integer_x *= 2             # integer_x = 4 * 2 = 8
+print(integer_x)</textarea><pre id="out2"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="6"># division
+float_x = 8 / 2            # float_x = 8 / 2 = 4.0
+float_x = float_x / 2      # float_x = 4.0 / 2 = 2.0
+float_x /= 2               # float_x = 2.0 / 2 = 1.0
+print(float_x)
+print(type(float_x))</textarea><pre id="out3"></pre></div>
+<p>須注意一旦做了除法（<code>/</code>）的運算，即使原本的資料型態是整數，也會被自動轉換成浮點數。計算結果如下：</p>
+<pre class="static"><code>5
+1
+8
+1.0
+&lt;class &#x27;float&#x27;&gt;</code></pre>
+<p>同樣的，整數和浮點數混在一起運算時，結果也會是浮點數：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="3">print(1 + 2.0)
+print(type(1 + 2.0))</textarea><pre id="out4"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>3.0
+&lt;class &#x27;float&#x27;&gt;</code></pre>
+<p>另外，除數不能是 0，否則會產生錯誤：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="3">print(1 / 0)</textarea><pre id="out5"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ZeroDivisionError: division by zero</code></pre>
+<h3 id="s2">浮點數的誤差</h3>
+<p>浮點數的運算，有時候會得到有點奇怪的結果，例如：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="3">print(0.1 + 0.2)
+print(round(0.1 + 0.2, 2))</textarea><pre id="out6"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>0.30000000000000004
+0.3</code></pre>
+<p>這並不是 Python 算錯了，而是電腦用二進位儲存小數，有些小數沒辦法剛好存下來，只能存一個非常接近的值，就像十進位沒辦法把 1/3 完整寫出來一樣。需要顯示結果時，可以用 round() 函數取到指定的小數位數，第二個參數就是要保留的位數。之後要比較兩個浮點數是否相等時，也要特別留意這個誤差。</p>
+<h2 id="s3">商數和餘數</h2>
+<p>商數透過「//」及「//=」、餘數透過「%」及「%=」來達成。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="3"># quotient
+integer_x = 5 // 2  # 5 / 2 = 2 ... 1
+print(integer_x)</textarea><pre id="out7"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn8" onclick="run(8)" disabled>執行</button></div><textarea id="code8" spellcheck="false" rows="3">integer_x = 5
+integer_x //= 2
+print(integer_x)</textarea><pre id="out8"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3"># remainder
+integer_x = 5 % 2  # 5 / 2 = 2 ... 1
+print(integer_x)</textarea><pre id="out9"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3">integer_x = 5
+integer_x %= 2
+print(integer_x)</textarea><pre id="out10"></pre></div>
+<p>計算結果：</p>
+<pre class="static"><code>2
+2
+1
+1</code></pre>
+<p>和 <code>/</code> 不同，<code>//</code> 兩邊都是整數時，計算結果也會是整數。</p>
+<p>要注意的是，負數的商數是往比較小的方向取整數，而不是直接把小數去掉，所以 <code>-5 // 2</code> 會得到 <code>-3</code> 而不是 <code>-2</code>，餘數則是 <code>1</code>（因為 -3 × 2 + 1 = -5）：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="3">print(-5 // 2)
+print(-5 % 2)</textarea><pre id="out11"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>-3
+1</code></pre>
+<p>如果商數和餘數都需要，可以用 divmod() 函數一次取得，結果會用括號把商數和餘數包在一起：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">print(divmod(5, 2))</textarea><pre id="out12"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>(2, 1)</code></pre>
+<h2 id="s4">次方</h2>
+<p>次方透過「<strong>」及「</strong>=」來達成。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3"># exponent
+integer_x = 2 ** 3  # integer_x = 2 ** 3 = 8
+print(integer_x)</textarea><pre id="out13"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn14" onclick="run(14)" disabled>執行</button></div><textarea id="code14" spellcheck="false" rows="3">integer_x = 2
+integer_x **= 3
+print(integer_x)</textarea><pre id="out14"></pre></div>
+<p>計算結果：</p>
+<pre class="static"><code>8
+8</code></pre>
+<p>要注意 Python 的次方是兩個星號，不是數學上常見的 <code>^</code>。<code>^</code> 在 Python 裡是另一種運算，<code>2 ^ 3</code> 並不會得到 8：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn15" onclick="run(15)" disabled>執行</button></div><textarea id="code15" spellcheck="false" rows="3">print(2 ^ 3)</textarea><pre id="out15"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>1</code></pre>
+<p>另外，Python 的整數沒有大小上限，次方算出很大的數字也沒問題：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn16" onclick="run(16)" disabled>執行</button></div><textarea id="code16" spellcheck="false" rows="3">print(2 ** 100)</textarea><pre id="out16"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>1267650600228229401496703205376</code></pre>
+<h2 id="s5">運算的優先順序</h2>
+<p>就如同我們在國小學習的四則運算，需記住一個 PEMDAS 原則，運算時由左而右依序為括號優先、再來次方、乘除、最後是加減。</p>
+<div class="tablewrap"><table><thead><tr><th>縮寫</th><th>英文</th><th>中文</th></tr></thead><tbody><tr><td>P</td><td>Parentheses</td><td>括號</td></tr><tr><td>E</td><td>Exponents</td><td>次方</td></tr><tr><td>MD</td><td>Multiplication and Division</td><td>乘除</td></tr><tr><td>AS</td><td>Addition and Subtraction</td><td>加減</td></tr></tbody></table></div>
+<p>例如以下兩行，只差在有沒有括號，結果就不一樣：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn17" onclick="run(17)" disabled>執行</button></div><textarea id="code17" spellcheck="false" rows="3">print(2 + 3 * 4)
+print((2 + 3) * 4)</textarea><pre id="out17"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>14
+20</code></pre>
+<p>有幾個細節要注意：</p>
+<ul><li><code>//</code> 和 <code>%</code> 跟乘除在同一層，一樣由左而右計算，例如 <code>2 * 3 % 4</code> 會先算 <code>2 * 3</code> 得到 6，再取餘數得到 2</li><li>次方是例外，連續的次方是<strong>由右而左</strong>計算，<code>2 <strong> 3 </strong> 2</code> 會先算 <code>3 ** 2</code>，得到的是 2 的 9 次方</li><li>負號比次方晚算，<code>-2 <strong> 2</code> 等同於 <code>-(2 </strong> 2)</code>，想算負 2 的平方要寫成 <code>(-2) ** 2</code></li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn18" onclick="run(18)" disabled>執行</button></div><textarea id="code18" spellcheck="false" rows="4">print(2 * 3 % 4)
+print(2 ** 3 ** 2)
+print(-2 ** 2)
+print((-2) ** 2)</textarea><pre id="out18"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>2
+512
+-4
+4</code></pre>
+<p>不確定先算哪一個的時候，加上括號最保險，程式也會比較容易閱讀。</p>
+<hr>
+<p>這一章我們認識了 Python 的算術運算子與指派運算子，也看到了除法會產生浮點數、浮點數會有誤差、負數的商數往小的方向取整數這些容易踩到的細節。運算的順序大致跟數學一樣，遇到不確定的地方，用括號把想先算的部分包起來就好。</p>
+<h2 id="s6">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/03-arithmetic/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/03-arithmetic.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">四則運算</a><a class="item lv3" href="#s2" data-id="s2">浮點數的誤差</a><a class="item lv2" href="#s3" data-id="s3">商數和餘數</a><a class="item lv2" href="#s4" data-id="s4">次方</a><a class="item lv2" href="#s5" data-id="s5">運算的優先順序</a><a class="item lv2" href="#s6" data-id="s6">本章程式碼</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>
