@@ -115,7 +115,7 @@
   <h1>基本數學運算</h1>
   <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
 <h2 id="s1">四則運算</h2>
-<p>Python 的四則運算透過「+」（加）、「-」（減）、「*」（乘）、「/」（除）等算術運算子，或是「+=」、「-=」、「*=」、「/=」等指派運算子來達成。這裡的「+=」若寫成「a += b」，即等同於「a = a + b」的意思。</p>
+<p>Python 的四則運算透過 <code>+</code>（加）、<code>-</code>（減）、<code>*</code>（乘）、<code>/</code>（除）等算術運算子，或是 <code>+=</code>、<code>-=</code>、<code>*=</code>、<code>/=</code> 等指派運算子來達成。這裡的 <code>+=</code> 若寫成 <code>a += b</code>，即等同於 <code>a = a + b</code> 的意思。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="5"># addition
 integer_x = 1 + 2          # integer_x = 3
 integer_x = integer_x + 1  # integer_x = 3 + 1 = 4
@@ -160,9 +160,9 @@ print(round(0.1 + 0.2, 2))</textarea><pre id="out6"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>0.30000000000000004
 0.3</code></pre>
-<p>這並不是 Python 算錯了，而是電腦用二進位儲存小數，有些小數沒辦法剛好存下來，只能存一個非常接近的值，就像十進位沒辦法把 1/3 完整寫出來一樣。需要顯示結果時，可以用 round() 函數取到指定的小數位數，第二個參數就是要保留的位數。之後要比較兩個浮點數是否相等時，也要特別留意這個誤差。</p>
+<p>這並不是 Python 算錯了，而是電腦用二進位儲存小數，有些小數沒辦法剛好存下來，只能存一個非常接近的值，就像十進位沒辦法把 1/3 完整寫出來一樣。需要顯示結果時，可以用 <code>round()</code> 函數取到指定的小數位數，第二個參數就是要保留的位數。之後要比較兩個浮點數是否相等時，也要特別留意這個誤差。</p>
 <h2 id="s3">商數和餘數</h2>
-<p>商數透過「//」及「//=」、餘數透過「%」及「%=」來達成。</p>
+<p>商數透過 <code>//</code> 及 <code>//=</code>、餘數透過 <code>%</code> 及 <code>%=</code> 來達成。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="3"># quotient
 integer_x = 5 // 2  # 5 / 2 = 2 ... 1
 print(integer_x)</textarea><pre id="out7"></pre></div>
@@ -181,18 +181,18 @@ print(integer_x)</textarea><pre id="out10"></pre></div>
 1
 1</code></pre>
 <p>和 <code>/</code> 不同，<code>//</code> 兩邊都是整數時，計算結果也會是整數。</p>
-<p>要注意的是，負數的商數是往比較小的方向取整數，而不是直接把小數去掉，所以 <code>-5 // 2</code> 會得到 <code>-3</code> 而不是 <code>-2</code>，餘數則是 <code>1</code>（因為 -3 × 2 + 1 = -5）：</p>
+<p>要注意的是，負數的商數是往比較小的方向取整數，而不是直接把小數去掉，所以 <code>-5 // 2</code> 會得到 <code>-3</code> 而不是 <code>-2</code>，餘數則是 <code>1</code>（因為 <code>-3 * 2 + 1 = -5</code>）：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="3">print(-5 // 2)
 print(-5 % 2)</textarea><pre id="out11"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>-3
 1</code></pre>
-<p>如果商數和餘數都需要，可以用 divmod() 函數一次取得，結果會用括號把商數和餘數包在一起：</p>
+<p>如果商數和餘數都需要，可以用 <code>divmod()</code> 函數一次取得，結果會用括號把商數和餘數包在一起：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">print(divmod(5, 2))</textarea><pre id="out12"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>(2, 1)</code></pre>
 <h2 id="s4">次方</h2>
-<p>次方透過「<strong>」及「</strong>=」來達成。</p>
+<p>次方透過 <code><strong></code> 及 <code></strong>=</code> 來達成。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3"># exponent
 integer_x = 2 ** 3  # integer_x = 2 ** 3 = 8
 print(integer_x)</textarea><pre id="out13"></pre></div>
@@ -202,7 +202,7 @@ print(integer_x)</textarea><pre id="out14"></pre></div>
 <p>計算結果：</p>
 <pre class="static"><code>8
 8</code></pre>
-<p>要注意 Python 的次方是兩個星號，不是數學上常見的 <code>^</code>。<code>^</code> 在 Python 裡是另一種運算，<code>2 ^ 3</code> 並不會得到 8：</p>
+<p>要注意 Python 的次方是兩個星號，不是數學上常見的 <code>^</code>。<code>^</code> 在 Python 裡是另一種運算（XOR 位元運算），<code>2 ^ 3</code> 並不會得到 8：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn15" onclick="run(15)" disabled>執行</button></div><textarea id="code15" spellcheck="false" rows="3">print(2 ^ 3)</textarea><pre id="out15"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>1</code></pre>
@@ -211,7 +211,7 @@ print(integer_x)</textarea><pre id="out14"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>1267650600228229401496703205376</code></pre>
 <h2 id="s5">運算的優先順序</h2>
-<p>就如同我們在國小學習的四則運算，需記住一個 PEMDAS 原則，運算時由左而右依序為括號優先、再來次方、乘除、最後是加減。</p>
+<p>如同我們在國小學習的四則運算，需記住一個 PEMDAS 原則，運算時的優先順序依序為括號優先、再來次方、乘除、最後是加減。</p>
 <div class="tablewrap"><table><thead><tr><th>縮寫</th><th>英文</th><th>中文</th></tr></thead><tbody><tr><td>P</td><td>Parentheses</td><td>括號</td></tr><tr><td>E</td><td>Exponents</td><td>次方</td></tr><tr><td>MD</td><td>Multiplication and Division</td><td>乘除</td></tr><tr><td>AS</td><td>Addition and Subtraction</td><td>加減</td></tr></tbody></table></div>
 <p>例如以下兩行，只差在有沒有括號，結果就不一樣：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn17" onclick="run(17)" disabled>執行</button></div><textarea id="code17" spellcheck="false" rows="3">print(2 + 3 * 4)

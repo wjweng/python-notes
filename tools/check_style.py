@@ -141,6 +141,23 @@ def check_headings(prose: list[tuple[int, str]]) -> list[str]:
     return hits
 
 
+def check_inline_code(prose: list[tuple[int, str]]) -> list[str]:
+    """函數名稱與運算子要包成行內程式碼，不用「」也不裸寫。
+
+    2026-10-01 weijie 校稿第 03 章：「+」→ `+`、round() → `round()`，
+    並確認第 02 章的 print()、type() 等（含小標）一併改。
+    """
+    hits = []
+    for num, line in prose:
+        bare = re.sub(r"`[^`]*`", "", line)
+        bare = re.sub(r"\]\([^)]*\)", "]", bare)
+        for m in re.finditer(r"\b[A-Za-z_][A-Za-z0-9_]*\(\)", bare):
+            hits.append(f"L{num}  函數名稱要加程式碼格式：{m.group(0)} → `{m.group(0)}`")
+        for m in re.finditer(r"「([+\-*/%=<>!^&|]+)」", bare):
+            hits.append(f"L{num}  運算子用程式碼格式，不用「」：{m.group(0)} → `{m.group(1)}`")
+    return hits
+
+
 def check_cross_links(text: str, chapter_dir: str) -> list[str]:
     """跨版本連結必須指向「本章」的頁面，不是站台首頁、也不是別章。
 
@@ -237,6 +254,7 @@ def report(path: Path, quiet: bool) -> bool:
         ("小標只用兩層且是名詞短語", check_headings(prose)),
         ("有收尾段", check_ending(text, prose)),
         ("跨版本連結指向本章", check_cross_links(text, path.parent.name)),
+        ("函數名稱與運算子用程式碼格式", check_inline_code(prose)),
     ]
 
     sents = sentences(prose)
