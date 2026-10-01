@@ -28,6 +28,13 @@ python3 tools/build_web.py        # Pyodide 互動頁
 
 `notebooks/` 與 `web/` 底下的檔案不要手動編輯，重跑腳本會覆蓋。
 
+產生之後的兩道檢查：
+
+```bash
+uv run --with playwright python tools/check_web.py [NN]   # 網頁版每一段都能單獨執行、輸出與本機相同
+python3 tools/check_vocus.py NN <文章網址>                 # 方格子上的文章與原稿一致
+```
+
 ## 命名規則
 
 **repo 裡的資料夾與檔名一律英文小寫 slug**（`01-environment-setup`），內容維持中文。
