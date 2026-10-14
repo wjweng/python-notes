@@ -183,7 +183,7 @@ False
 
 ### `==` 和 `=` 不一樣
 
-要注意檢查是否相等用的是兩個等號 `==`，一個等號 `=` 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：
+要注意檢查是否「相等」用的是兩個等號 `==`，一個等號 `=` 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：
 
 ```python
 x = 1
@@ -197,7 +197,7 @@ if x = 1:
 SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?
 ```
 
-Python 猜我們想寫的是 `==`，另一個選項 `:=` 是指派運算式（assignment expression），本系列不會用到。
+Python 會提示我們是否想寫的是 `==` 而不是 `=`。
 
 ## 邏輯運算子
 
@@ -306,4 +306,4 @@ Your BMI is 23.148148148148145, and you have a normal weight.
 
 ## 參考資料
 
-[1] [衛生福利部：肥胖是慢性疾病！調整飲食及運動生活是最佳處方](https://www.mohw.gov.tw/cp-3796-42429-1.html)
+[1] [成人健康體位標準](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=542&pid=9737)

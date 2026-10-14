@@ -208,13 +208,13 @@ False
 True
 False</code></pre>
 <h3 id="s7"><code>==</code> 和 <code>=</code> 不一樣</h3>
-<p>要注意檢查是否相等用的是兩個等號 <code>==</code>，一個等號 <code>=</code> 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：</p>
+<p>要注意檢查是否「相等」用的是兩個等號 <code>==</code>，一個等號 <code>=</code> 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3">x = 1
 if x = 1:
     print(&quot;x is 1&quot;)</textarea><pre id="out9"></pre></div>
 <p>錯誤訊息的最後一行如下：</p>
 <pre class="static"><code>SyntaxError: invalid syntax. Maybe you meant &#x27;==&#x27; or &#x27;:=&#x27; instead of &#x27;=&#x27;?</code></pre>
-<p>Python 猜我們想寫的是 <code>==</code>，另一個選項 <code>:=</code> 是指派運算式（assignment expression），本系列不會用到。</p>
+<p>Python 會提示我們是否想寫的是 <code>==</code> 而不是 <code>=</code>。</p>
 <h2 id="s8">邏輯運算子</h2>
 <ul><li><code>and</code> 運算子，例如：<code>condition1 and condition2</code>，兩條件必須同時成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>or</code> 運算子，例如：<code>condition1 or condition2</code>，兩條件至少有一個成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>not</code> 運算子，例如：<code>not condition1</code>，此條件不成立為 <code>True</code>，反之為 <code>False</code>。</li></ul>
 <p>舉例來說：</p>
@@ -273,7 +273,7 @@ Your BMI is 23.148148148148145, and you have a normal weight.</code></pre>
 <h2 id="s11">本章程式碼</h2>
 <ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/04-conditionals/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/04-conditionals.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
 <h2 id="s12">參考資料</h2>
-<p>[1] <a href="https://www.mohw.gov.tw/cp-3796-42429-1.html">衛生福利部：肥胖是慢性疾病！調整飲食及運動生活是最佳處方</a></p>
+<p>[1] <a href="https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=542&amp;pid=9737">成人健康體位標準</a></p>
 </div>
 <button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
   <span class="ic">☰</span><span class="now">本章目錄</span>
