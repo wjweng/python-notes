@@ -1,0 +1,74 @@
+{
+  "04-fig1-if": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [1, 1]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [0, 2.7]}
+    ],
+    "edges": [
+      {"from": "start", "to": "c1"},
+      {"from": "c1", "to": "a", "label": "Yes"},
+      {"from": "c1", "to": "end", "label": "No"},
+      {"from": "a", "to": "end", "via": [[1, 2.2], [0, 2.2]]}
+    ]
+  },
+  "04-fig2-if-else": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [1, 1]},
+      {"id": "b", "type": "process", "label": "Do B", "at": [0, 2]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [0, 3.2]}
+    ],
+    "edges": [
+      {"from": "start", "to": "c1"},
+      {"from": "c1", "to": "a", "label": "Yes"},
+      {"from": "c1", "to": "b", "label": "No"},
+      {"from": "b", "to": "end"},
+      {"from": "a", "to": "end", "via": [[1, 2.7], [0, 2.7]]}
+    ]
+  },
+  "04-fig3-nested-if": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 1]},
+      {"id": "c2", "type": "decision", "label": "condition2", "at": [1, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [2, 1]},
+      {"id": "b", "type": "process", "label": "Do B", "at": [1, 2]},
+      {"id": "c", "type": "process", "label": "Do C", "at": [0, 2]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [0, 3.2]}
+    ],
+    "edges": [
+      {"from": "start", "to": "c1"},
+      {"from": "c1", "to": "c2", "label": "Yes"},
+      {"from": "c2", "to": "a", "label": "Yes"},
+      {"from": "c2", "to": "b", "label": "No"},
+      {"from": "c1", "to": "c", "label": "No"},
+      {"from": "c", "to": "end"},
+      {"from": "b", "to": "end", "via": [[1, 2.7], [0, 2.7]]},
+      {"from": "a", "to": "end", "via": [[2, 2.7], [0, 2.7]]}
+    ]
+  },
+  "04-fig4-if-elif-else": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [1, 1]},
+      {"id": "c2", "type": "decision", "label": "condition2", "at": [0, 2.15]},
+      {"id": "b", "type": "process", "label": "Do B", "at": [1, 2.15]},
+      {"id": "c", "type": "process", "label": "Do C", "at": [0, 3.15]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [0, 4.3]}
+    ],
+    "edges": [
+      {"from": "start", "to": "c1"},
+      {"from": "c1", "to": "a", "label": "Yes"},
+      {"from": "c1", "to": "c2", "label": "No"},
+      {"from": "c2", "to": "b", "label": "Yes"},
+      {"from": "c2", "to": "c", "label": "No"},
+      {"from": "c", "to": "end"},
+      {"from": "a", "to": "end", "via": [[1.38, 1], [1.38, 3.75], [0, 3.75]]},
+      {"from": "b", "to": "end", "via": [[1.38, 2.15], [1.38, 3.75], [0, 3.75]]}
+    ]
+  }
+}

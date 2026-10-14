@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>if 流程控制 — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #4ec9b0; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元一・入門</div>
+  <h1>if 流程控制</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<p>當我們的程式需要根據某些狀況做出判斷，例如某些條件成立的話，程式就對應做出某種行為，這時單純從頭執行到尾的程式便無法滿足我們的需求，因此便需引進流程控制的概念，也就是 if 敘述以及其相關的語法，來讓程式可以完成更複雜的工作。</p>
+<h2 id="s1">if 敘述</h2>
+<p>最基本 if 敘述語法如下，如果滿足 condition1 的條件判斷，則執行 A 程式碼區塊，否則就結束判斷。</p>
+<pre class="static"><code>if condition1:
+    Do A</code></pre>
+<p><img src="../chapters/04-conditionals/figures/04-fig1-if.png" alt="condition1 成立走 Yes 去執行 Do A，不成立走 No 直接結束" title="點一下放大" loading="lazy"><span class="cap">condition1 成立走 Yes 去執行 Do A，不成立走 No 直接結束</span></p>
+<p>例如以下的程式，<code>is_raining</code> 是 <code>True</code>，所以會印出提醒帶傘的訊息：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="4">is_raining = True
+if is_raining:
+    print(&quot;Take an umbrella.&quot;)
+print(&quot;Go out.&quot;)</textarea><pre id="out0"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>Take an umbrella.
+Go out.</code></pre>
+<h3 id="s2">縮排與冒號</h3>
+<p>上面的例子裡，<code>print(&quot;Take an umbrella.&quot;)</code> 前面空了 4 格，<code>print(&quot;Go out.&quot;)</code> 則沒有，這個差別是有意義的。Python 用縮排來決定哪幾行屬於 if 的程式碼區塊：縮排的那幾行只在條件成立時才執行，沒有縮排的 <code>print(&quot;Go out.&quot;)</code> 已經在 if 之外，不論條件是否成立都會執行。把 <code>is_raining</code> 改成 <code>False</code>，就只會印出「Go out.」。</p>
+<p>縮排在 Python 是語法的一部分，習慣上用 4 個半形空白，同一個區塊裡的每一行縮排要一致。if 的那一行最後的冒號 <code>:</code> 也不能省略，它代表接下來是一個程式碼區塊。</p>
+<p>如果忘了縮排：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="3">is_raining = True
+if is_raining:
+print(&quot;Take an umbrella.&quot;)</textarea><pre id="out1"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndentationError: expected an indented block after &#x27;if&#x27; statement on line 2</code></pre>
+<p>如果忘了冒號：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="3">is_raining = True
+if is_raining
+    print(&quot;Take an umbrella.&quot;)</textarea><pre id="out2"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>SyntaxError: expected &#x27;:&#x27;</code></pre>
+<h2 id="s3">if / else 敘述</h2>
+<p>進一步，如果滿足 condition1 的條件判斷時執行 A 程式碼區塊，不滿足時要執行 B 程式碼區塊，則可以用 if / else 敘述。</p>
+<pre class="static"><code>if condition1:
+    Do A
+else:
+    Do B</code></pre>
+<p><img src="../chapters/04-conditionals/figures/04-fig2-if-else.png" alt="condition1 成立執行 Do A，不成立執行 Do B，兩條路最後會合" title="點一下放大" loading="lazy"><span class="cap">condition1 成立執行 Do A，不成立執行 Do B，兩條路最後會合</span></p>
+<h2 id="s4">巢狀 if 敘述</h2>
+<p>若 if 敘述裡面包含有其它的 if 敘述，稱為巢狀 if 敘述。</p>
+<pre class="static"><code>if condition1:
+    if condition2:
+        Do A
+    else:
+        Do B
+else:
+    Do C</code></pre>
+<p><img src="../chapters/04-conditionals/figures/04-fig3-nested-if.png" alt="condition1 成立之後才會再判斷 condition2，決定執行 Do A 或 Do B" title="點一下放大" loading="lazy"><span class="cap">condition1 成立之後才會再判斷 condition2，決定執行 Do A 或 Do B</span></p>
+<h2 id="s5">if / elif / else 敘述</h2>
+<p>當程式有多個條件要做判斷時，可使用 if / elif / else 敘述。</p>
+<pre class="static"><code>if condition1:
+    Do A
+elif condition2:
+    Do B
+......
+else:
+    Do C</code></pre>
+<p><img src="../chapters/04-conditionals/figures/04-fig4-if-elif-else.png" alt="condition1 不成立才會判斷 condition2，兩個都不成立才執行 Do C" title="點一下放大" loading="lazy"><span class="cap">condition1 不成立才會判斷 condition2，兩個都不成立才執行 Do C</span></p>
+<p>例如，當我們要設計一個 BMI（Body Mass Index）的計算程式時，必須判斷[1]：</p>
+<ul><li>若 BMI 小於 18.5 時，體重過輕。</li><li>若 BMI 大於或等於 18.5、且 BMI 小於 24 時，體重正常。</li><li>若 BMI 大於或等於 24、且 BMI 小於 27 時，體重過重。</li><li>若 BMI 大於或等於 27 時，則達到肥胖的程度。</li></ul>
+<p>此時除了必須運用 if / elif / else 語法外，還需引入關係運算子與邏輯運算子的觀念。</p>
+<h2 id="s6">關係運算子</h2>
+<ul><li><code>a &gt; b</code>：檢查 a 是否大於 b</li><li><code>a &gt;= b</code>：檢查 a 是否大於或等於 b</li><li><code>a &lt; b</code>：檢查 a 是否小於 b</li><li><code>a &lt;= b</code>：檢查 a 是否小於或等於 b</li><li><code>a == b</code>：檢查 a 是否等於 b</li><li><code>a != b</code>：檢查 a 是否不等於 b</li></ul>
+<p>舉例來說：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="3"># a &gt; b
+print(2 &gt; 1)
+print(1 &gt; 2)</textarea><pre id="out3"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="3"># a &gt;= b
+print(2 &gt;= 2)
+print(1 &gt;= 2)</textarea><pre id="out4"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="3"># a &lt; b
+print(1 &lt; 2)
+print(2 &lt; 1)</textarea><pre id="out5"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="3"># a &lt;= b
+print(2 &lt;= 2)
+print(2 &lt;= 1)</textarea><pre id="out6"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="3"># a == b
+print(2 == 2)
+print(2 == 1)</textarea><pre id="out7"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn8" onclick="run(8)" disabled>執行</button></div><textarea id="code8" spellcheck="false" rows="3"># a != b
+print(2 != 1)
+print(2 != 2)</textarea><pre id="out8"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>True
+False
+True
+False
+True
+False
+True
+False
+True
+False
+True
+False</code></pre>
+<h3 id="s7"><code>==</code> 和 <code>=</code> 不一樣</h3>
+<p>要注意檢查是否相等用的是兩個等號 <code>==</code>，一個等號 <code>=</code> 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3">x = 1
+if x = 1:
+    print(&quot;x is 1&quot;)</textarea><pre id="out9"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>SyntaxError: invalid syntax. Maybe you meant &#x27;==&#x27; or &#x27;:=&#x27; instead of &#x27;=&#x27;?</code></pre>
+<p>Python 猜我們想寫的是 <code>==</code>，另一個選項 <code>:=</code> 是指派運算式（assignment expression），本系列不會用到。</p>
+<h2 id="s8">邏輯運算子</h2>
+<ul><li><code>and</code> 運算子，例如：<code>condition1 and condition2</code>，兩條件必須同時成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>or</code> 運算子，例如：<code>condition1 or condition2</code>，兩條件至少有一個成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>not</code> 運算子，例如：<code>not condition1</code>，此條件不成立為 <code>True</code>，反之為 <code>False</code>。</li></ul>
+<p>舉例來說：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3"># and
+print((1 &lt; 2) and (2 &lt; 3))
+print((1 &lt; 2) and (3 &lt; 2))</textarea><pre id="out10"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="3"># or
+print((1 &lt; 2) or (3 &lt; 2))
+print((2 &lt; 1) or (3 &lt; 2))</textarea><pre id="out11"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3"># not
+print(not (1 &gt; 2))
+print(not (1 &lt; 2))</textarea><pre id="out12"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>True
+False
+True
+False
+True
+False</code></pre>
+<h3 id="s9">連鎖比較</h3>
+<p>前面 BMI 正常範圍的條件「大於或等於 18.5、且小於 24」，用 <code>and</code> 可以寫成 <code>bmi &gt;= 18.5 and bmi &lt; 24</code>。Python 也允許把兩個比較直接串在一起，寫成跟數學一樣的 <code>18.5 &lt;= bmi &lt; 24</code>，兩種寫法的結果相同：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3">bmi = 23.1
+print(bmi &gt;= 18.5 and bmi &lt; 24)
+print(18.5 &lt;= bmi &lt; 24)</textarea><pre id="out13"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>True
+True</code></pre>
+<h2 id="s10">實作 BMI 計算機</h2>
+<p>綜合以上所學，這個程式會要求使用者輸入身高和體重，接著計算 BMI，然後回傳它所計算的數值並判斷體重是否在正常範圍內。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn14" onclick="run(14)" disabled>執行</button></div><textarea id="code14" spellcheck="false" rows="16"># input your height and weight
+height = float(input(&quot;Please input your height in centimeter:\n&quot;))
+weight = float(input(&quot;Please input your weight in kilogram:\n&quot;))
+
+# calculate BMI
+bmi = weight / ((height / 100) ** 2)
+
+# BMI interpretation
+if bmi &lt; 18.5:
+    print(f&quot;Your BMI is {bmi}, and you are underweight.&quot;)
+elif bmi &lt; 24:
+    print(f&quot;Your BMI is {bmi}, and you have a normal weight.&quot;)
+elif bmi &lt; 27:
+    print(f&quot;Your BMI is {bmi}, and you are overweight.&quot;)
+else:
+    print(f&quot;Your BMI is {bmi}, and you are obese.&quot;)</textarea><pre id="out14"></pre></div>
+<p>以下是執行結果：</p>
+<pre class="static"><code>Please input your height in centimeter:
+180
+Please input your weight in kilogram:
+75
+Your BMI is 23.148148148148145, and you have a normal weight.</code></pre>
+<p>身高和體重用 <code>float()</code> 轉換，是因為使用者可能輸入「175.5」這種帶小數點的數字，用 <code>int()</code> 轉換會產生 <code>ValueError</code>。</p>
+<p>注意程式裡第二個條件只寫了 <code>bmi &lt; 24</code>，沒有寫 <code>bmi &gt;= 18.5</code>。這是因為 if / elif / else 會由上往下逐一判斷，遇到第一個成立的條件，就執行它底下的區塊，其餘的條件都會跳過不再判斷。能走到 <code>elif bmi &lt; 24</code> 這一行，代表前面的 <code>bmi &lt; 18.5</code> 已經不成立，也就是 BMI 一定大於或等於 18.5，所以下限不必再寫一次。也因為如此，條件的先後順序會影響結果，把範圍由小到大依序排好，程式才會判斷正確。</p>
+<hr>
+<p>這一章我們學會了用 if、if / else、巢狀 if 與 if / elif / else 讓程式依條件走不同的路，也認識了關係運算子與邏輯運算子。Python 用縮排決定哪些程式碼屬於同一個區塊，遇到 <code>IndentationError</code> 或 <code>SyntaxError</code> 時，可以先檢查縮排、冒號，以及比較時是不是少寫了一個等號。</p>
+<h2 id="s11">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/04-conditionals/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/04-conditionals.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+<h2 id="s12">參考資料</h2>
+<p>[1] <a href="https://www.mohw.gov.tw/cp-3796-42429-1.html">衛生福利部：肥胖是慢性疾病！調整飲食及運動生活是最佳處方</a></p>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">if 敘述</a><a class="item lv3" href="#s2" data-id="s2">縮排與冒號</a><a class="item lv2" href="#s3" data-id="s3">if / else 敘述</a><a class="item lv2" href="#s4" data-id="s4">巢狀 if 敘述</a><a class="item lv2" href="#s5" data-id="s5">if / elif / else 敘述</a><a class="item lv2" href="#s6" data-id="s6">關係運算子</a><a class="item lv3" href="#s7" data-id="s7">== 和 = 不一樣</a><a class="item lv2" href="#s8" data-id="s8">邏輯運算子</a><a class="item lv3" href="#s9" data-id="s9">連鎖比較</a><a class="item lv2" href="#s10" data-id="s10">實作 BMI 計算機</a><a class="item lv2" href="#s11" data-id="s11">本章程式碼</a><a class="item lv2" href="#s12" data-id="s12">參考資料</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>
