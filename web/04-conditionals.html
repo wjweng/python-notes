@@ -172,7 +172,7 @@ else:
 <p><img src="../chapters/04-conditionals/figures/04-fig4-if-elif-else.png" alt="condition1 不成立才會判斷 condition2，兩個都不成立才執行 Do C" title="點一下放大" loading="lazy"><span class="cap">condition1 不成立才會判斷 condition2，兩個都不成立才執行 Do C</span></p>
 <p>例如，當我們要設計一個 BMI（Body Mass Index）的計算程式時，必須判斷[1]：</p>
 <ul><li>若 BMI 小於 18.5 時，體重過輕。</li><li>若 BMI 大於或等於 18.5、且 BMI 小於 24 時，體重正常。</li><li>若 BMI 大於或等於 24、且 BMI 小於 27 時，體重過重。</li><li>若 BMI 大於或等於 27 時，則達到肥胖的程度。</li></ul>
-<p>此時除了必須運用 if / elif / else 語法外，還需引入關係運算子與邏輯運算子的觀念。</p>
+<p>此時除了必須運用 if / elif / else 語法外，還需要能比較大小的關係運算子；條件裡的「且」，則可以用邏輯運算子來表示。</p>
 <h2 id="s6">關係運算子</h2>
 <ul><li><code>a &gt; b</code>：檢查 a 是否大於 b</li><li><code>a &gt;= b</code>：檢查 a 是否大於或等於 b</li><li><code>a &lt; b</code>：檢查 a 是否小於 b</li><li><code>a &lt;= b</code>：檢查 a 是否小於或等於 b</li><li><code>a == b</code>：檢查 a 是否等於 b</li><li><code>a != b</code>：檢查 a 是否不等於 b</li></ul>
 <p>舉例來說：</p>
@@ -243,7 +243,7 @@ print(18.5 &lt;= bmi &lt; 24)</textarea><pre id="out13"></pre></div>
 <pre class="static"><code>True
 True</code></pre>
 <h2 id="s10">實作 BMI 計算機</h2>
-<p>綜合以上所學，這個程式會要求使用者輸入身高和體重，接著計算 BMI，然後回傳它所計算的數值並判斷體重是否在正常範圍內。</p>
+<p>綜合以上所學，這個程式會要求使用者輸入身高和體重，接著計算 BMI，然後印出它所計算的數值並判斷體重是否在正常範圍內。</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn14" onclick="run(14)" disabled>執行</button></div><textarea id="code14" spellcheck="false" rows="16"># input your height and weight
 height = float(input(&quot;Please input your height in centimeter:\n&quot;))
 weight = float(input(&quot;Please input your weight in kilogram:\n&quot;))
