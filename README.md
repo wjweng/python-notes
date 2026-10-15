@@ -15,6 +15,12 @@
 | 03 | 基本數學運算 | [📖](./chapters/03-arithmetic/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/03-arithmetic.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/03-arithmetic.html) |
 | 04 | if 流程控制 | [📖](./chapters/04-conditionals/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/04-conditionals.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/04-conditionals.html) |
 
+**單元二・串列與迴圈**　list、for、while、random 模組
+
+| # | 章節 | GitHub | Colab | 網頁 |
+| :- | :--- | :-: | :-: | :-: |
+| 05 | 串列（list） | [📖](./chapters/05-lists/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/05-lists.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/05-lists.html) |
+
 <!-- chapters:end -->
 
 ## 這個 repo 怎麼運作

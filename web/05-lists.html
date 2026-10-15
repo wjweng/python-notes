@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>串列（list） — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #569cd6; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元二・串列與迴圈</div>
+  <h1>串列（list）</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<p>前面提到變數為程式儲存資料的地方，一個變數可以儲存一個學生的成績、一個人的身高、或是一個人名等，但如果多人的資料要管理，為每個人設計一個變數顯然就有點不切實際，串列就是用來解決這樣的問題。</p>
+<h2 id="s1">串列</h2>
+<p>Python 的串列可以包含相同型別的元素，例如記錄一個國家的城市，也可以包含不同型別的元素，例如記錄一個人的姓名、身高、體重等個人資料。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city)</textarea><pre id="out0"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="3">student = [&quot;小明&quot;, 140, 45]
+print(student)</textarea><pre id="out1"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;小明&#x27;, 140, 45]</code></pre>
+<h2 id="s2">讀取串列元素</h2>
+<p>我們可以利用串列的索引值（index），來讀取串列的內容，Python 的串列索引是標記相對於第一個元素的位置，因此第一個元素的索引值為 0、第二個元素的索引值為 1，以此類推。此外，若索引值是 -1，代表的是串列的最後一個元素、若索引值是 -2，代表的是串列的倒數第二個元素，以此類推。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="7">student = [&quot;小明&quot;, 140, 45]
+print(student[0])
+print(student[1])
+print(student[2])
+print(student[-1])
+print(student[-2])
+print(student[-3])</textarea><pre id="out2"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>小明
+140
+45
+45
+140
+小明</code></pre>
+<p><code>student</code> 只有 3 個元素，索引值的範圍是 0 到 2（或 -1 到 -3），若讀取超出這個範圍的索引值，程式會產生錯誤：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="3">student = [&quot;小明&quot;, 140, 45]
+print(student[3])</textarea><pre id="out3"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndexError: list index out of range</code></pre>
+<p>若要同時取得串列中的多個元素，可用串列切片（slice）的方式：</p>
+<ul><li><code>list[a:b]</code>：取得串列索引值為 a 到 <code>b - 1</code> 的元素</li><li><code>list[:a]</code>：取得串列前 a 個元素</li><li><code>list[a:]</code>：取得串列索引值為 a 到最後一個元素</li><li><code>list[a:b:c]</code>：以 c 為間隔取得串列索引值為 a 到 <code>b - 1</code> 的元素</li><li><code>list[:]</code>：取得串列所有元素</li></ul>
+<p>例如：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="6">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city[2:5])
+print(city[:2])
+print(city[2:])
+print(city[1:5:2])
+print(city[:])</textarea><pre id="out4"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;]
+[&#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;桃園&#x27;, &#x27;台中&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]</code></pre>
+<p>和讀取單一元素不同，切片的範圍超出串列長度時不會產生錯誤，超出的部分會直接被忽略：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city[3:10])</textarea><pre id="out5"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台中&#x27;, &#x27;台南&#x27;]</code></pre>
+<h2 id="s3">串列的長度與檢查元素</h2>
+<p>既然讀取超出範圍的索引值會產生錯誤，在讀取之前知道串列有多少個元素就很重要了。<code>len()</code> 函數可以取得串列的長度，也就是元素的個數，因此最後一個元素的索引值就是 <code>len(city) - 1</code>。若只是想知道某個值在不在串列裡，則可以用 <code>in</code> 運算子，在串列裡就得到 <code>True</code>，反之為 <code>False</code>；<code>not in</code> 則剛好相反。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(len(city))
+print(city[len(city) - 1])</textarea><pre id="out6"></pre></div>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="4">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(&quot;新竹&quot; in city)
+print(&quot;高雄&quot; in city)
+print(&quot;高雄&quot; not in city)</textarea><pre id="out7"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>5
+台南
+True
+False
+True</code></pre>
+<h2 id="s4">修改串列元素</h2>
+<p>串列可指定索引值修改其內容：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn8" onclick="run(8)" disabled>執行</button></div><textarea id="code8" spellcheck="false" rows="3">student = [&quot;小明&quot;, 140, 45]
+student[2] = 50
+print(student)</textarea><pre id="out8"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;小明&#x27;, 140, 50]</code></pre>
+<h2 id="s5">增加串列元素</h2>
+<p>當需要在串列後方增加串列元素時，若使用超出串列長度的索引值來修改串列的內容，程式會產生錯誤。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city[5] = &quot;宜蘭&quot;</textarea><pre id="out9"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndexError: list assignment index out of range</code></pre>
+<p>有幾種方法可以達成這個目標：</p>
+<ul><li>串列可和另一串列相加。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city = city + [&quot;宜蘭&quot;]
+print(city)</textarea><pre id="out10"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;宜蘭&#x27;]</code></pre>
+<ul><li>使用 <code>append()</code> 方法，將新的元素或串列加到串列的尾端。若為串列，則加入後會以串列的形式存在，也就是串列中有元素是串列。要讀取這個串列裡的元素，可以連續使用兩次索引值，例如 <code>city[5][0]</code> 是先取出索引值為 5 的串列，再取出它索引值為 0 的元素。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="5">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.append([&quot;花蓮&quot;, &quot;台東&quot;])
+print(city)
+print(city[5])
+print(city[5][0])</textarea><pre id="out11"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, [&#x27;花蓮&#x27;, &#x27;台東&#x27;]]
+[&#x27;花蓮&#x27;, &#x27;台東&#x27;]
+花蓮</code></pre>
+<ul><li>使用 <code>extend()</code> 方法，將新的串列加到串列的尾端。和 <code>append()</code> 不同的是，串列會拆解為元素一一加入串列的尾端。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.extend([&quot;澎湖&quot;, &quot;金門&quot;])
+print(city)</textarea><pre id="out12"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;澎湖&#x27;, &#x27;金門&#x27;]</code></pre>
+<p><code>extend()</code> 會把傳進去的東西一個一個拆開再加入，字串也會被拆成一個一個字。因此若要加入的是一個字串，應該用 <code>append()</code>，或是把字串放進串列裡再用 <code>extend()</code>：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn13" onclick="run(13)" disabled>執行</button></div><textarea id="code13" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.extend(&quot;宜蘭&quot;)
+print(city)</textarea><pre id="out13"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;宜&#x27;, &#x27;蘭&#x27;]</code></pre>
+<ul><li>使用 <code>insert()</code> 方法，將新的元素或串列插入指定的位置。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn14" onclick="run(14)" disabled>執行</button></div><textarea id="code14" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.insert(4, &quot;嘉義&quot;)
+print(city)</textarea><pre id="out14"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;嘉義&#x27;, &#x27;台南&#x27;]</code></pre>
+<h3 id="s6">這些方法會直接修改原本的串列</h3>
+<p>注意串列相加的寫法需要 <code>city = city + [&quot;宜蘭&quot;]</code>，把相加後產生的新串列指派回 <code>city</code>；而 <code>append()</code>、<code>extend()</code>、<code>insert()</code> 是直接修改原本的串列，它們的回傳值是 <code>None</code>。如果照著相加的習慣寫成 <code>city = city.append(&quot;宜蘭&quot;)</code>，<code>city</code> 就會被換成 <code>None</code>，原本的串列也就找不回來了：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn15" onclick="run(15)" disabled>執行</button></div><textarea id="code15" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city = city.append(&quot;宜蘭&quot;)
+print(city)</textarea><pre id="out15"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>None</code></pre>
+<h2 id="s7">刪除串列元素</h2>
+<ul><li>使用 <code>del</code> 將串列中指定的元素刪除。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn16" onclick="run(16)" disabled>執行</button></div><textarea id="code16" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+del city[4]
+print(city)</textarea><pre id="out16"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<ul><li>使用 <code>pop()</code> 將串列中指定的元素刪除，並回傳刪除的元素；若沒有指定，則會刪除串列中最後一個元素。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn17" onclick="run(17)" disabled>執行</button></div><textarea id="code17" spellcheck="false" rows="5">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city.pop())
+print(city)
+print(city.pop(1))
+print(city)</textarea><pre id="out17"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>台南
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]
+桃園
+[&#x27;台北&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<ul><li>使用 <code>remove()</code> 將串列中第一個等於指定的元素的值刪除。</li></ul>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn18" onclick="run(18)" disabled>執行</button></div><textarea id="code18" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.remove(&quot;台中&quot;)
+print(city)</textarea><pre id="out18"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台南&#x27;]</code></pre>
+<p>若串列裡找不到指定的值，<code>remove()</code> 會產生錯誤，可以先用 <code>in</code> 檢查這個值在不在串列裡再刪除：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn19" onclick="run(19)" disabled>執行</button></div><textarea id="code19" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.remove(&quot;高雄&quot;)</textarea><pre id="out19"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ValueError: list.remove(x): x not in list</code></pre>
+<h2 id="s8">複製串列</h2>
+<p>前面增加與刪除元素的方法，都是直接修改原本的串列，因此把串列指派給另一個變數時要特別注意：<code>my_city = city</code> 並不會複製出一個新的串列，而是讓兩個變數指向同一個串列，所以透過 <code>my_city</code> 加入元素，<code>city</code> 也會跟著改變。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn20" onclick="run(20)" disabled>執行</button></div><textarea id="code20" spellcheck="false" rows="4">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;]
+my_city = city
+my_city.append(&quot;台中&quot;)
+print(city)</textarea><pre id="out20"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<p>若要得到一個可以獨立修改的串列，可以用前面切片提到的 <code>city[:]</code>，它取得串列所有元素後會產生一個新的串列；也可以寫成 <code>city.copy()</code>，效果相同。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn21" onclick="run(21)" disabled>執行</button></div><textarea id="code21" spellcheck="false" rows="5">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;]
+my_city = city[:]
+my_city.append(&quot;台中&quot;)
+print(city)
+print(my_city)</textarea><pre id="out21"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<p>不過這樣的複製只有外層，若串列裡還有串列，裡面的串列仍然是同一個，修改它一樣會影響原本的串列：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn22" onclick="run(22)" disabled>執行</button></div><textarea id="code22" spellcheck="false" rows="4">city = [&quot;台北&quot;, [&quot;花蓮&quot;, &quot;台東&quot;]]
+my_city = city[:]
+my_city[1].append(&quot;屏東&quot;)
+print(city)</textarea><pre id="out22"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, [&#x27;花蓮&#x27;, &#x27;台東&#x27;, &#x27;屏東&#x27;]]</code></pre>
+<hr>
+<p>這一章我們學會了建立串列、用索引值與切片讀取元素，以及增加、修改、刪除與複製串列元素的方法。遇到 <code>IndexError</code> 時，可以先用 <code>len()</code> 確認串列的長度，看看索引值是不是超出了範圍；串列的內容跟預期的不一樣時，則可以檢查是不是有兩個變數指向同一個串列。</p>
+<h2 id="s9">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/05-lists/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/05-lists.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">串列</a><a class="item lv2" href="#s2" data-id="s2">讀取串列元素</a><a class="item lv2" href="#s3" data-id="s3">串列的長度與檢查元素</a><a class="item lv2" href="#s4" data-id="s4">修改串列元素</a><a class="item lv2" href="#s5" data-id="s5">增加串列元素</a><a class="item lv3" href="#s6" data-id="s6">這些方法會直接修改原本的串列</a><a class="item lv2" href="#s7" data-id="s7">刪除串列元素</a><a class="item lv2" href="#s8" data-id="s8">複製串列</a><a class="item lv2" href="#s9" data-id="s9">本章程式碼</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>

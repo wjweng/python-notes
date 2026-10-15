@@ -92,6 +92,14 @@
       "title": "if 流程控制",
       "snippet": "bmi = 23.1\nif bmi < 18.5:\n    print(\"underweight\")\nelif bmi < 24:\n    print(\"normal weight\")\nelse:\n    print(\"overweight\")",
       "web_static": []
+    },
+    {
+      "num": "05",
+      "unit": 2,
+      "dir": "05-lists",
+      "title": "串列（list）",
+      "snippet": "city = [\"台北\", \"桃園\", \"新竹\"]\ncity.append(\"台中\")\nprint(city[-1])\nprint(len(city))",
+      "web_static": []
     }
   ]
 }
