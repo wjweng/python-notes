@@ -228,7 +228,7 @@ city.insert(4, &quot;嘉義&quot;)
 print(city)</textarea><pre id="out14"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;嘉義&#x27;, &#x27;台南&#x27;]</code></pre>
-<h3 id="s6">這些方法會直接修改原本的串列</h3>
+<h3 id="s6">直接修改原本串列的方法</h3>
 <p>注意串列相加的寫法需要 <code>city = city + [&quot;宜蘭&quot;]</code>，把相加後產生的新串列指派回 <code>city</code>；而 <code>append()</code>、<code>extend()</code>、<code>insert()</code> 是直接修改原本的串列，它們的回傳值是 <code>None</code>。如果照著相加的習慣寫成 <code>city = city.append(&quot;宜蘭&quot;)</code>，<code>city</code> 就會被換成 <code>None</code>，原本的串列也就找不回來了：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn15" onclick="run(15)" disabled>執行</button></div><textarea id="code15" spellcheck="false" rows="3">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
 city = city.append(&quot;宜蘭&quot;)
@@ -300,7 +300,7 @@ print(city)</textarea><pre id="out22"></pre></div>
 <aside id="toc">
   <a class="home" href="../index.html">← 回首頁</a>
   <div class="label">本章目錄</div>
-  <nav><a class="item lv2" href="#s1" data-id="s1">串列</a><a class="item lv2" href="#s2" data-id="s2">讀取串列元素</a><a class="item lv2" href="#s3" data-id="s3">串列的長度與檢查元素</a><a class="item lv2" href="#s4" data-id="s4">修改串列元素</a><a class="item lv2" href="#s5" data-id="s5">增加串列元素</a><a class="item lv3" href="#s6" data-id="s6">這些方法會直接修改原本的串列</a><a class="item lv2" href="#s7" data-id="s7">刪除串列元素</a><a class="item lv2" href="#s8" data-id="s8">複製串列</a><a class="item lv2" href="#s9" data-id="s9">本章程式碼</a></nav>
+  <nav><a class="item lv2" href="#s1" data-id="s1">串列</a><a class="item lv2" href="#s2" data-id="s2">讀取串列元素</a><a class="item lv2" href="#s3" data-id="s3">串列的長度與檢查元素</a><a class="item lv2" href="#s4" data-id="s4">修改串列元素</a><a class="item lv2" href="#s5" data-id="s5">增加串列元素</a><a class="item lv3" href="#s6" data-id="s6">直接修改原本串列的方法</a><a class="item lv2" href="#s7" data-id="s7">刪除串列元素</a><a class="item lv2" href="#s8" data-id="s8">複製串列</a><a class="item lv2" href="#s9" data-id="s9">本章程式碼</a></nav>
 </aside>
 <div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
 <script>
