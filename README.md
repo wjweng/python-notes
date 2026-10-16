@@ -29,6 +29,8 @@
 
 ```bash
 python3 tools/build_cover.py      # 章節封面 PNG
+python3 tools/build_flowchart.py  # figures/flowcharts.json → 流程圖 PNG
+python3 tools/build_memory.py     # figures/memory.json → 記憶體示意圖 PNG（變數 → 串列的箭頭圖）
 python3 tools/build_notebook.py   # Colab notebook
 python3 tools/build_web.py        # Pyodide 互動頁
 ```
