@@ -1,0 +1,32 @@
+{
+  "05-fig1-alias-vs-copy": {
+    "titles": [
+      {"text": "my_city = city", "at": [20, 30]},
+      {"text": "my_city = city[:]", "at": [20, 220]}
+    ],
+    "vars": [
+      {"name": "city", "at": [120, 80], "to": "same"},
+      {"name": "my_city", "at": [120, 140], "to": "same"},
+      {"name": "city", "at": [120, 270], "to": "orig"},
+      {"name": "my_city", "at": [120, 340], "to": "copy"}
+    ],
+    "lists": [
+      {"id": "same", "at": [250, 110], "items": ["台北", "桃園", "新竹", "台中"], "new": [3]},
+      {"id": "orig", "at": [250, 270], "items": ["台北", "桃園", "新竹"]},
+      {"id": "copy", "at": [250, 340], "items": ["台北", "桃園", "新竹", "台中"], "new": [3]}
+    ],
+    "rules": [185]
+  },
+  "05-fig2-shallow-copy": {
+    "titles": [{"text": "my_city = city[:]", "at": [20, 30]}],
+    "vars": [
+      {"name": "city", "at": [120, 80], "to": "outer1"},
+      {"name": "my_city", "at": [120, 170], "to": "outer2"}
+    ],
+    "lists": [
+      {"id": "outer1", "at": [250, 80], "items": ["台北", {"ref": "inner"}]},
+      {"id": "outer2", "at": [250, 170], "items": ["台北", {"ref": "inner"}]},
+      {"id": "inner", "at": [520, 125], "items": ["花蓮", "台東", "屏東"], "new": [2]}
+    ]
+  }
+}
