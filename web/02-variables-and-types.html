@@ -330,7 +330,16 @@ async function run(i) {
       out.textContent += v + "\n";
       return v;
     } });
-    await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    let error = null;
+    try {
+      await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    } catch (e) {
+      error = e;
+    }
+    // sys.stdout 是行緩衝：print(x, end=" ") 這種沒有換行結尾的輸出會留在 Python 的緩衝區，
+    // 要等下一段程式印出換行才吐出來，結果跑到別段的輸出框。每段跑完都主動 flush。
+    pyodide.runPython("import sys\nsys.stdout.flush()\nsys.stderr.flush()");
+    if (error) throw error;
     if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
   } catch (e) {
     out.className = "err";
