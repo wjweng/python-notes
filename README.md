@@ -20,6 +20,7 @@
 | # | 章節 | GitHub | Colab | 網頁 |
 | :- | :--- | :-: | :-: | :-: |
 | 05 | 串列（list） | [📖](./chapters/05-lists/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/05-lists.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/05-lists.html) |
+| 06 | 基本 for 迴圈 | [📖](./chapters/06-for-loop/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/06-for-loop.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/06-for-loop.html) |
 
 <!-- chapters:end -->
 
