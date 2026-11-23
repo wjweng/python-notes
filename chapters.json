@@ -161,6 +161,15 @@
         "secrets.SystemRandom().shuffle(password_list)\n\npassword = \"\""
       ],
       "vocus": "https://vocus.cc/article/61b8c38bfd89780001bca9ee"
+    },
+    {
+      "num": "10",
+      "unit": 2,
+      "dir": "10-advanced-for-loop",
+      "title": "進階 for 迴圈",
+      "snippet": "for i in range(1, 10):\n    for j in range(1, 10):\n        print(i * j)",
+      "web_static": [],
+      "web_output_differs": []
     }
   ]
 }

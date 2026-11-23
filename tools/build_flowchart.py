@@ -23,6 +23,7 @@
 - at：格線座標 [欄, 列]，可以是小數；一欄 COL px、一列 ROW px
 - via：轉折點，同樣用格線座標。連線一律走水平／垂直線段，起點與終點會自動貼到節點邊緣
 - 標籤（Yes／No）放在第一段線段旁邊
+- hw：選填，節點的半寬（px），文字放不下時加寬（第 10 章的 `Do B; continue`）
 - 判斷框用該章所屬單元的配色（chapters.json 的 units.accent），跟封面一致
 """
 import json
@@ -63,10 +64,15 @@ def px(point):
     return point[0] * COL, point[1] * ROW
 
 
-def clip(center, toward, kind):
+def half(node: dict) -> tuple[int, int]:
+    hw, hh = HALF[node["type"]]
+    return node.get("hw", hw), hh
+
+
+def clip(center, toward, node):
     """從節點中心沿水平或垂直方向走到邊緣。"""
     (cx, cy), (tx, ty) = center, toward
-    hw, hh = HALF[kind]
+    hw, hh = half(node)
     if abs(tx - cx) >= abs(ty - cy):
         return (cx + hw, cy) if tx > cx else (cx - hw, cy)
     return (cx, cy + hh) if ty > cy else (cx, cy - hh)
@@ -79,7 +85,7 @@ def render_svg(chart: dict, accent: str) -> tuple[str, int, int]:
 
     for n in chart["nodes"]:
         cx, cy = px(n["at"])
-        hw, hh = HALF[n["type"]]
+        hw, hh = half(n)
         xs += [cx - hw, cx + hw]
         ys += [cy - hh, cy + hh]
         text = escape(n["label"])
@@ -97,8 +103,8 @@ def render_svg(chart: dict, accent: str) -> tuple[str, int, int]:
         src, dst = nodes[e["from"]], nodes[e["to"]]
         mids = [px(p) for p in e.get("via", [])]
         a, b = px(src["at"]), px(dst["at"])
-        start = clip(a, mids[0] if mids else b, src["type"])
-        end = clip(b, mids[-1] if mids else a, dst["type"])
+        start = clip(a, mids[0] if mids else b, src)
+        end = clip(b, mids[-1] if mids else a, dst)
         pts = [start, *mids, end]
         xs += [p[0] for p in pts]
         ys += [p[1] for p in pts]

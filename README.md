@@ -24,6 +24,7 @@
 | 07 | random 模組 | [📖](./chapters/07-random/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/07-random.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/07-random.html) |
 | 08 | random 模組：種子與狀態 | [📖](./chapters/08-random-seed/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/08-random-seed.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/08-random-seed.html) |
 | 09 | 專題：密碼產生器 | [📖](./chapters/09-password-generator/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/09-password-generator.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/09-password-generator.html) |
+| 10 | 進階 for 迴圈 | [📖](./chapters/10-advanced-for-loop/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/10-advanced-for-loop.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/10-advanced-for-loop.html) |
 
 <!-- chapters:end -->
 

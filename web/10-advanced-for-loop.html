@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>進階 for 迴圈 — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #569cd6; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元二・串列與迴圈</div>
+  <h1>進階 for 迴圈</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<p>目前為止，我們學到了基本的 for 迴圈，也就是僅對一個可迭代物件進行迭代。當一個迴圈裡面還有另一個迴圈，這時就形成了巢狀迴圈，最基本的例子就是九九乘法表，每個被乘數都對應到 9 個乘數，當被乘數和 9 個乘數都計算完了之後，才換下一個被乘數，不斷迴圈直到每個被乘數和乘數都計算過。另一個 for 迴圈的應用是將串列和 for 迴圈結合，使用串列綜合運算（list comprehension）的方式生成串列，讓程式的可讀性更高也更精簡。</p>
+<h2 id="s1">巢狀 for 迴圈</h2>
+<p>巢狀 for 迴圈的基本語法如下：</p>
+<pre class="static"><code>for item1 in object1:
+    for item2 in object2:
+        Do something to each item1 and item2</code></pre>
+<p>以製作一個九九乘法表當作例子，程式執行時，會先從外層迴圈取得 <code>range(1, 10)</code> 裡的第一個元素 <code>i = 1</code>，接著進到內層迴圈，依序取得 <code>range(1, 10)</code> 裡的每一個元素，也就是 <code>j = 1</code> 到 <code>j = 9</code>，分別執行 <code>print()</code> 裡面的內容，全部執行完畢後，才會再返回外層迴圈，取得 <code>range(1, 10)</code> 裡的第二個元素 <code>i = 2</code>，以此類推，直到內、外層迴圈的所有元素都迭代完成。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="5"># nested for loop
+for i in range(1, 10):
+    for j in range(1, 10):
+        print(f&quot;{i}*{j}={i*j:&lt;4}&quot;, end=&quot; &quot;)
+    print()</textarea><pre id="out0"></pre></div>
+<p>執行結果如下：</p>
+<pre class="static"><code>1*1=1    1*2=2    1*3=3    1*4=4    1*5=5    1*6=6    1*7=7    1*8=8    1*9=9
+2*1=2    2*2=4    2*3=6    2*4=8    2*5=10   2*6=12   2*7=14   2*8=16   2*9=18
+3*1=3    3*2=6    3*3=9    3*4=12   3*5=15   3*6=18   3*7=21   3*8=24   3*9=27
+4*1=4    4*2=8    4*3=12   4*4=16   4*5=20   4*6=24   4*7=28   4*8=32   4*9=36
+5*1=5    5*2=10   5*3=15   5*4=20   5*5=25   5*6=30   5*7=35   5*8=40   5*9=45
+6*1=6    6*2=12   6*3=18   6*4=24   6*5=30   6*6=36   6*7=42   6*8=48   6*9=54
+7*1=7    7*2=14   7*3=21   7*4=28   7*5=35   7*6=42   7*7=49   7*8=56   7*9=63
+8*1=8    8*2=16   8*3=24   8*4=32   8*5=40   8*6=48   8*7=56   8*8=64   8*9=72
+9*1=9    9*2=18   9*3=27   9*4=36   9*5=45   9*6=54   9*7=63   9*8=72   9*9=81</code></pre>
+<p>內層迴圈的 <code>print()</code> 加上 <code>end=&quot; &quot;</code>，所以同一個被乘數的 9 個算式會排在同一行；內層跑完之後，外層的 <code>print()</code> 才換行。f-string 大括號裡的 <code>{i*j:&lt;4}</code>，冒號後面的 <code>&lt;4</code> 代表「至少占 4 個字元寬、靠左對齊」，乘積不足 4 位數時會在右邊補空白，每一欄才會對齊。</p>
+<h3 id="s2">內外層用了同一個變數名稱</h3>
+<p>巢狀迴圈的內外層，迴圈變數要取不同的名字。如果內層也用 <code>i</code>，內層每一輪都會讓 <code>i</code> 改指向新的值，外層在內層跑完之後拿到的 <code>i</code>，就已經不是原本的值了：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="5">for i in range(1, 4):
+    print(f&quot;外層開始：i = {i}&quot;)
+    for i in range(1, 3):
+        print(f&quot;  內層：i = {i}&quot;)
+    print(f&quot;外層結束：i = {i}&quot;)</textarea><pre id="out1"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>外層開始：i = 1
+  內層：i = 1
+  內層：i = 2
+外層結束：i = 2
+外層開始：i = 2
+  內層：i = 1
+  內層：i = 2
+外層結束：i = 2
+外層開始：i = 3
+  內層：i = 1
+  內層：i = 2
+外層結束：i = 2</code></pre>
+<p>外層一樣跑了 3 輪，因為外層每一輪開始時，都會從 <code>range(1, 4)</code> 取出下一個數字重新指定給 <code>i</code>；但每一輪在內層跑完之後，<code>i</code> 都停在內層最後的 2。如同<a href="https://wjweng.github.io/python-notes/web/06-for-loop.html">第 06 章</a>〈迴圈結束之後的迴圈變數〉提到的，迴圈結束之後迴圈變數會停在最後一輪拿到的值，內層迴圈也不例外。如果外層在內層之後還要用到 <code>i</code>，結果就會出錯。</p>
+<h2 id="s3">break 指令</h2>
+<p>在迴圈中，有時當滿足了一些條件，我們不希望迴圈繼續執行下去，需要跳出迴圈，這時可以使用 break 指令，其基本流程與語法如下：</p>
+<p><img src="../chapters/10-advanced-for-loop/figures/10-fig1-break.png" alt="condition1 成立時執行 Do B 後直接跳到 End，不再回到迴圈開頭" title="點一下放大" loading="lazy"><span class="cap">condition1 成立時執行 Do B 後直接跳到 End，不再回到迴圈開頭</span></p>
+<pre class="static"><code>for item in object:
+    Do A
+    if condition1:
+        Do B
+        break
+    Do C</code></pre>
+<p>在以下範例，我們利用 <code>random.randint()</code> 函數隨機生成十個 0～100 區間內的整數並存成串列，再經過串列的 <code>sort()</code> 方法將十個整數由大到小依序排列，並輸出大於 60 的整數。此例子中，由於已將串列內的整數由大到小排列，因此在 for 迴圈中，當 if 條件判斷到數字不大於 60 時，即可進入 else 區塊，執行 break 指令跳出迴圈。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="15">import random
+
+# break
+random.seed(1)
+scores_list = []
+for _ in range(10):
+    scores_list.append(random.randint(0, 100))
+scores_list.sort(reverse=True)
+print(scores_list)
+
+for score in scores_list:
+    if score &gt; 60:
+        print(score, end=&quot; &quot;)
+    else:
+        break</textarea><pre id="out2"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[97, 97, 72, 63, 60, 57, 32, 17, 15, 8]
+97 97 72 63</code></pre>
+<p>這裡用了<a href="https://wjweng.github.io/python-notes/web/08-random-seed.html">第 08 章</a>的 <code>random.seed(1)</code> 固定種子，所以每次執行都會產生同一串數字，方便對照結果。第一個 for 迴圈只是用來重複執行十遍，迴圈變數用不到，因此同樣取名為底線 <code>_</code>。第二個 for 迴圈印到 63 之後，下一個數字是 60，不大於 60，於是執行 break 跳出迴圈，後面的 57、32 等數字就不會再檢查了。</p>
+<h3 id="s4"><code>sort()</code> 方法</h3>
+<p><code>sort()</code> 會把串列裡的元素由小到大排列，加上 <code>reverse=True</code> 則改成由大到小。它和<a href="https://wjweng.github.io/python-notes/web/07-random.html">第 07 章</a>的 <code>shuffle()</code> 一樣，是直接修改原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="5">numbers = [3, 1, 2]
+print(numbers.sort())
+print(numbers)
+numbers.sort(reverse=True)
+print(numbers)</textarea><pre id="out3"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>None
+[1, 2, 3]
+[3, 2, 1]</code></pre>
+<h3 id="s5">break 只跳出最內層的迴圈</h3>
+<p>在巢狀迴圈裡，break 只會跳出它所在的那一層迴圈，外層迴圈會繼續執行下一輪：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="5">for i in range(1, 4):
+    for j in range(1, 4):
+        if j == 2:
+            break
+        print(f&quot;i = {i}, j = {j}&quot;)</textarea><pre id="out4"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>i = 1, j = 1
+i = 2, j = 1
+i = 3, j = 1</code></pre>
+<p>每一輪內層迴圈到 <code>j == 2</code> 時就被 break 跳出，所以 <code>j</code> 只印到 1；但外層迴圈並沒有被跳出，<code>i</code> 仍然從 1 跑到 3。</p>
+<h3 id="s6">for … else</h3>
+<p>for 迴圈後面也可以接一個 else 區塊，它只在迴圈<strong>沒有被 break 跳出</strong>、正常跑完全部元素時才會執行。以下兩段程式只差在串列的最後有沒有 60：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="15">scores_list = [97, 97, 72, 63]
+for score in scores_list:
+    if score &lt;= 60:
+        print(f&quot;Found {score}&quot;)
+        break
+else:
+    print(&quot;All scores are above 60&quot;)
+
+scores_list = [97, 97, 72, 63, 60]
+for score in scores_list:
+    if score &lt;= 60:
+        print(f&quot;Found {score}&quot;)
+        break
+else:
+    print(&quot;All scores are above 60&quot;)</textarea><pre id="out5"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>All scores are above 60
+Found 60</code></pre>
+<p>第一段的每個分數都大於 60，迴圈沒有遇到 break，跑完之後執行了 else 區塊；第二段遇到 60 時執行 break 跳出，else 區塊就被跳過了。注意這個 else 和 for 對齊，是屬於 for 迴圈的，跟<a href="https://wjweng.github.io/python-notes/web/04-conditionals.html">第 04 章</a>和 if 對齊的 else 不同。</p>
+<h2 id="s7">continue 指令</h2>
+<p>在迴圈中，有時當滿足了一些條件，我們希望直接執行下一個迴圈，而不執行該次迴圈的內容，這時可以使用 continue 指令，其基本流程與語法如下：</p>
+<p><img src="../chapters/10-advanced-for-loop/figures/10-fig2-continue.png" alt="condition1 成立時執行 Do B 後跳過 Do C，直接回到迴圈開頭取下一個元素" title="點一下放大" loading="lazy"><span class="cap">condition1 成立時執行 Do B 後跳過 Do C，直接回到迴圈開頭取下一個元素</span></p>
+<pre class="static"><code>for item in object:
+    Do A
+    if condition1:
+        Do B
+        continue
+    Do C</code></pre>
+<p>在這個範例我們利用 if 條件判斷是否為偶數，若成立則執行 continue 指令進入下一個迴圈，因此最後只會印出 <code>range()</code> 範圍內的奇數。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="7"># continue
+odd_list = []
+for i in range(1, 10):
+    if i % 2 == 0:
+        continue
+    odd_list.append(i)
+print(odd_list)</textarea><pre id="out6"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[1, 3, 5, 7, 9]</code></pre>
+<h2 id="s8">串列綜合運算（list comprehension）</h2>
+<p>當 for 迴圈、if 條件和串列結合，我們可以用更簡潔的方式生成串列，例如在 break 指令範例中產生隨機整數的這段程式碼：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="7">import random
+
+random.seed(1)
+scores_list = []
+for _ in range(10):
+    scores_list.append(random.randint(0, 100))
+print(scores_list)</textarea><pre id="out7"></pre></div>
+<p>將 for 迴圈和串列結合，等同於這個寫法：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn8" onclick="run(8)" disabled>執行</button></div><textarea id="code8" spellcheck="false" rows="5">import random
+
+random.seed(1)
+scores_list = [random.randint(0, 100) for _ in range(10)]
+print(scores_list)</textarea><pre id="out8"></pre></div>
+<p>兩段程式的執行結果相同：</p>
+<pre class="static"><code>[17, 72, 97, 8, 32, 15, 63, 97, 57, 60]</code></pre>
+<p>中括號裡 <code>for</code> 前面的 <code>random.randint(0, 100)</code>，就是每一輪要放進串列的值，<code>for _ in range(10)</code> 則和 for 迴圈一樣，決定要跑幾輪。</p>
+<p>又例如在 continue 指令範例的程式碼，將 for 迴圈、if 條件和串列結合，等同於這個寫法：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn9" onclick="run(9)" disabled>執行</button></div><textarea id="code9" spellcheck="false" rows="3">odd_list = [i for i in range(1, 10) if i % 2 == 1]
+print(odd_list)</textarea><pre id="out9"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[1, 3, 5, 7, 9]</code></pre>
+<p>寫在最後面的 <code>if</code> 用來篩選，條件成立的 <code>i</code> 才會被放進串列。注意條件的方向和 continue 範例相反：continue 範例寫的是「偶數就跳過」，這裡寫的是「奇數才放進去」。</p>
+<p>再進一步，我們也可將巢狀 for 迴圈、if 條件和串列結合，例如以下這個例子，我們希望找出數字 1 到 9 內，相加等於 10 的組合，串列的生成可以簡單一行程式碼完成：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn10" onclick="run(10)" disabled>執行</button></div><textarea id="code10" spellcheck="false" rows="3">add_to_10 = [[i, j] for i in range(1, 10) for j in range(1, 10) if i + j == 10]
+print(add_to_10)</textarea><pre id="out10"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[[1, 9], [2, 8], [3, 7], [4, 6], [5, 5], [6, 4], [7, 3], [8, 2], [9, 1]]</code></pre>
+<p>兩個 <code>for</code> 由左往右讀，就是巢狀迴圈由外往內的順序：左邊的 <code>for i</code> 是外層，右邊的 <code>for j</code> 是內層。換成巢狀 for 迴圈的寫法如下，執行結果相同：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn11" onclick="run(11)" disabled>執行</button></div><textarea id="code11" spellcheck="false" rows="6">add_to_10 = []
+for i in range(1, 10):
+    for j in range(1, 10):
+        if i + j == 10:
+            add_to_10.append([i, j])
+print(add_to_10)</textarea><pre id="out11"></pre></div>
+<h3 id="s9"><code>if</code> 放在前面還是後面</h3>
+<p><code>if</code> 也可以寫在 <code>for</code> 的前面，但意思不一樣。寫在前面的是 <code>A if 條件 else B</code> 的形式，意思是條件成立時取 <code>A</code>，否則取 <code>B</code>，它決定的是「放進去的值」，每一輪都會放一個元素進串列；寫在後面的 <code>if</code> 則是篩選，決定「要不要放進去」：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn12" onclick="run(12)" disabled>執行</button></div><textarea id="code12" spellcheck="false" rows="3">numbers = [i if i % 2 == 1 else 0 for i in range(1, 10)]
+print(numbers)</textarea><pre id="out12"></pre></div>
+<p>執行結果：</p>
+<pre class="static"><code>[1, 0, 3, 0, 5, 0, 7, 0, 9]</code></pre>
+<p>奇數照原本的值放進去，偶數換成 0，串列一樣有 9 個元素；前面的 <code>odd_list</code> 則只留下 5 個奇數。</p>
+<h3 id="s10">綜合運算的迴圈變數</h3>
+<p><a href="https://wjweng.github.io/python-notes/web/06-for-loop.html">第 06 章</a>〈迴圈結束之後的迴圈變數〉提到，for 迴圈結束之後，迴圈變數會留下來。串列綜合運算則相反，裡面的迴圈變數只在中括號裡有效，結束之後就不見了：</p>
+<pre class="static"><code>odd_list = [i for i in range(1, 10) if i % 2 == 1]
+print(i)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>NameError: name &#x27;i&#x27; is not defined</code></pre>
+<hr>
+<p>這一章我們學會了用巢狀 for 迴圈處理兩層的資料，用 break 與 continue 控制迴圈何時跳出、何時跳過，以及用串列綜合運算把 for 迴圈與 if 條件寫成一行來生成串列。巢狀迴圈的結果跟預期不一樣時，可以先檢查內外層的迴圈變數是不是取了同一個名字；break 之後外層還在繼續跑時，則可以確認 break 是寫在哪一層迴圈裡。</p>
+<h2 id="s11">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/10-advanced-for-loop/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/10-advanced-for-loop.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">巢狀 for 迴圈</a><a class="item lv3" href="#s2" data-id="s2">內外層用了同一個變數名稱</a><a class="item lv2" href="#s3" data-id="s3">break 指令</a><a class="item lv3" href="#s4" data-id="s4">sort() 方法</a><a class="item lv3" href="#s5" data-id="s5">break 只跳出最內層的迴圈</a><a class="item lv3" href="#s6" data-id="s6">for … else</a><a class="item lv2" href="#s7" data-id="s7">continue 指令</a><a class="item lv2" href="#s8" data-id="s8">串列綜合運算（list comprehension）</a><a class="item lv3" href="#s9" data-id="s9">if 放在前面還是後面</a><a class="item lv3" href="#s10" data-id="s10">綜合運算的迴圈變數</a><a class="item lv2" href="#s11" data-id="s11">本章程式碼</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    let error = null;
+    try {
+      await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    } catch (e) {
+      error = e;
+    }
+    // sys.stdout 是行緩衝：print(x, end=" ") 這種沒有換行結尾的輸出會留在 Python 的緩衝區，
+    // 要等下一段程式印出換行才吐出來，結果跑到別段的輸出框。每段跑完都主動 flush。
+    pyodide.runPython("import sys\nsys.stdout.flush()\nsys.stderr.flush()");
+    if (error) throw error;
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>

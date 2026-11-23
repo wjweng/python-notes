@@ -1,0 +1,44 @@
+{
+  "10-fig1-break": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "loop", "type": "decision", "label": "for loop ends?", "at": [0, 1]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [1, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [0, 2]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 3]},
+      {"id": "b", "type": "process", "label": "Do B; break", "at": [1, 3]},
+      {"id": "c", "type": "process", "label": "Do C", "at": [0, 4]}
+    ],
+    "edges": [
+      {"from": "start", "to": "loop"},
+      {"from": "loop", "to": "end", "label": "Yes"},
+      {"from": "loop", "to": "a", "label": "No"},
+      {"from": "a", "to": "c1"},
+      {"from": "c1", "to": "b", "label": "Yes"},
+      {"from": "c1", "to": "c", "label": "No"},
+      {"from": "b", "to": "end"},
+      {"from": "c", "to": "loop", "via": [[-0.7, 4], [-0.7, 1]]}
+    ]
+  },
+  "10-fig2-continue": {
+    "nodes": [
+      {"id": "start", "type": "terminal", "label": "Start", "at": [0, 0]},
+      {"id": "loop", "type": "decision", "label": "for loop ends?", "at": [0, 1]},
+      {"id": "end", "type": "terminal", "label": "End", "at": [1, 1]},
+      {"id": "a", "type": "process", "label": "Do A", "at": [0, 2]},
+      {"id": "c1", "type": "decision", "label": "condition1", "at": [0, 3]},
+      {"id": "b", "type": "process", "label": "Do B; continue", "at": [1, 3], "hw": 90},
+      {"id": "c", "type": "process", "label": "Do C", "at": [0, 4]}
+    ],
+    "edges": [
+      {"from": "start", "to": "loop"},
+      {"from": "loop", "to": "end", "label": "Yes"},
+      {"from": "loop", "to": "a", "label": "No"},
+      {"from": "a", "to": "c1"},
+      {"from": "c1", "to": "b", "label": "Yes"},
+      {"from": "c1", "to": "c", "label": "No"},
+      {"from": "b", "to": "loop", "via": [[1, 4.6], [-0.7, 4.6], [-0.7, 1]]},
+      {"from": "c", "to": "loop", "via": [[-0.7, 4], [-0.7, 1]]}
+    ]
+  }
+}
