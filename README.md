@@ -22,6 +22,7 @@
 | 05 | 串列（list） | [📖](./chapters/05-lists/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/05-lists.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/05-lists.html) |
 | 06 | 基本 for 迴圈 | [📖](./chapters/06-for-loop/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/06-for-loop.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/06-for-loop.html) |
 | 07 | random 模組 | [📖](./chapters/07-random/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/07-random.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/07-random.html) |
+| 08 | random 模組：種子與狀態 | [📖](./chapters/08-random-seed/) | [▶](https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/08-random-seed.ipynb) | [⚡](https://wjweng.github.io/python-notes/web/08-random-seed.html) |
 
 <!-- chapters:end -->
 
