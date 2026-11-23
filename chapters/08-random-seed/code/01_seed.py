@@ -11,11 +11,11 @@ for i in range(5):
     print(f"loop {i}: {rand_int}")
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=" ")
 print()
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=" ")
 print()

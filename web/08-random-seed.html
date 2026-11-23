@@ -144,17 +144,18 @@ loop 4: 3</code></pre>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="11">import random
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=&quot; &quot;)
 print()
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=&quot; &quot;)
 print()</textarea><pre id="out2"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>3 10 2 5 2
 3 10 2 5 2</code></pre>
+<p>這裡的迴圈只是用來重複執行 5 次，迴圈變數用不到，因此取名為底線 <code>_</code>。如同<a href="https://wjweng.github.io/python-notes/web/02-variables-and-types.html">第 02 章</a>的命名規則，<code>_</code> 本身就是一個合法的變數名稱，它跟一般的變數一樣會被指定值，只是習慣上用這個名字告訴讀程式的人：這個值不會被使用。</p>
 <p>同一串裡的 5 個數字各不相同，看起來一樣是隨機的，但只要種子相同，整串數字就會完全一樣，重新執行整支程式也一樣。</p>
 <p><a href="https://wjweng.github.io/python-notes/web/07-random.html">第 07 章</a>提到每次執行的結果都會不同，那是因為沒有設定種子。固定種子在除錯或測試時很有用，程式的結果跟預期不一樣時，固定種子就能讓每次執行都重現同一個情況，方便找出問題；把程式分享給別人時，對方設定同樣的種子，也能得到跟我們一樣的結果。</p>
 <h3 id="s3">換了 Python 版本，結果可能不同</h3>

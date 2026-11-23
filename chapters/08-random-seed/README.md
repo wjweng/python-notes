@@ -57,12 +57,12 @@ loop 4: 3
 import random
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=" ")
 print()
 
 random.seed(1)
-for i in range(5):
+for _ in range(5):
     print(random.randint(1, 10), end=" ")
 print()
 ```
@@ -73,6 +73,8 @@ print()
 3 10 2 5 2
 3 10 2 5 2
 ```
+
+這裡的迴圈只是用來重複執行 5 次，迴圈變數用不到，因此取名為底線 `_`。如同[第 02 章](../02-variables-and-types/)的命名規則，`_` 本身就是一個合法的變數名稱，它跟一般的變數一樣會被指定值，只是習慣上用這個名字告訴讀程式的人：這個值不會被使用。
 
 同一串裡的 5 個數字各不相同，看起來一樣是隨機的，但只要種子相同，整串數字就會完全一樣，重新執行整支程式也一樣。
 

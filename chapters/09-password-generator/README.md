@@ -42,15 +42,15 @@ num_letters = int(input("How many letters would you like in your password?\n"))
 
 ```python
 password_list = []
-for i in range(num_numbers):
+for _ in range(num_numbers):
     password_list.append(random.choice(numbers))
-for i in range(num_symbols):
+for _ in range(num_symbols):
     password_list.append(random.choice(symbols))
-for i in range(num_letters):
+for _ in range(num_letters):
     password_list.append(random.choice(letters))
 ```
 
-這裡的 for 迴圈只是用來重複指定的次數：`range(num_numbers)` 會產生 `num_numbers` 個數字，迴圈就執行幾輪，迴圈變數 `i` 本身並沒有用到。
+這裡的 for 迴圈只是用來重複指定的次數：`range(num_numbers)` 會產生 `num_numbers` 個數字，迴圈就執行幾輪。迴圈變數用不到，因此如同[第 08 章](../08-random-seed/)〈在程式開頭設定一次種子〉提到的，取名為底線 `_`。
 
 ### 為什麼用 `append()`
 
@@ -131,11 +131,11 @@ num_symbols = int(input("How many symbols would you like in your password?\n"))
 num_letters = int(input("How many letters would you like in your password?\n"))
 
 password_list = []
-for i in range(num_numbers):
+for _ in range(num_numbers):
     password_list.append(random.choice(numbers))
-for i in range(num_symbols):
+for _ in range(num_symbols):
     password_list.append(random.choice(symbols))
-for i in range(num_letters):
+for _ in range(num_letters):
     password_list.append(random.choice(letters))
 
 random.shuffle(password_list)
@@ -183,11 +183,11 @@ num_symbols = int(input("How many symbols would you like in your password?\n"))
 num_letters = int(input("How many letters would you like in your password?\n"))
 
 password_list = []
-for i in range(num_numbers):
+for _ in range(num_numbers):
     password_list.append(secrets.choice(numbers))
-for i in range(num_symbols):
+for _ in range(num_symbols):
     password_list.append(secrets.choice(symbols))
-for i in range(num_letters):
+for _ in range(num_letters):
     password_list.append(secrets.choice(letters))
 
 secrets.SystemRandom().shuffle(password_list)

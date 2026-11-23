@@ -15,11 +15,11 @@ num_symbols = 4
 num_letters = 5
 
 password_list = []
-for i in range(num_numbers):
+for _ in range(num_numbers):
     password_list.append(random.choice(numbers))
-for i in range(num_symbols):
+for _ in range(num_symbols):
     password_list.append(random.choice(symbols))
-for i in range(num_letters):
+for _ in range(num_letters):
     password_list.append(random.choice(letters))
 
 random.shuffle(password_list)
