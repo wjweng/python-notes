@@ -136,7 +136,7 @@ for city in cities:
 新竹
 台中
 台南</code></pre>
-<p>如同第 04 章的 if 敘述，for 那一行的最後也要有冒號 <code>:</code>，下面縮排的程式碼區塊就是每一輪都會執行的部分。每一輪開始時，<code>city</code> 會依序指向 <code>cities</code> 裡的下一個元素，因此第一輪印出「台北」、第二輪印出「桃園」，直到最後一個元素印完，迴圈就結束了。</p>
+<p>如同<a href="https://wjweng.github.io/python-notes/web/04-conditionals.html">第 04 章</a>的 if 敘述，for 那一行的最後也要有冒號 <code>:</code>，下面縮排的程式碼區塊就是每一輪都會執行的部分。每一輪開始時，<code>city</code> 會依序指向 <code>cities</code> 裡的下一個元素，因此第一輪印出「台北」、第二輪印出「桃園」，直到最後一個元素印完，迴圈就結束了。</p>
 <h3 id="s2">迴圈結束之後的迴圈變數</h3>
 <p>迴圈結束之後，<code>city</code> 這個變數並不會消失，它的值會停在最後一輪拿到的元素。以下在迴圈之外多印一次 <code>city</code>：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="4">cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
@@ -158,7 +158,7 @@ for x in nums:
 print(nums)</textarea><pre id="out3"></pre></div>
 <p>執行結果：</p>
 <pre class="static"><code>[1, 2, 3]</code></pre>
-<p>第 05 章〈複製串列〉提到，<code>my_city = city</code> 是讓兩個變數指向同一個串列。同樣地，每一輪的 <code>x</code> 也只是暫時指向串列裡的一個元素，<code>x = x * 2</code> 是讓 <code>x</code> 改指向一個新的值，串列裡原本的元素並沒有被替換，因此印出來的 <code>nums</code> 還是原來的樣子。要產生一個每個元素都乘以 2 的新串列，後面的章節會介紹更適合的寫法。</p>
+<p><a href="https://wjweng.github.io/python-notes/web/05-lists.html">第 05 章</a>〈複製串列〉提到，<code>my_city = city</code> 是讓兩個變數指向同一個串列。同樣地，每一輪的 <code>x</code> 也只是暫時指向串列裡的一個元素，<code>x = x * 2</code> 是讓 <code>x</code> 改指向一個新的值，串列裡原本的元素並沒有被替換，因此印出來的 <code>nums</code> 還是原來的樣子。要產生一個每個元素都乘以 2 的新串列，後面的章節會介紹更適合的寫法。</p>
 <h2 id="s4">字串也可以用 for 迴圈</h2>
 <p>for 迴圈可以用在任何可迭代物件上，不只是串列。例如字串也是可迭代物件，用 for 迴圈就能一個字一個字取出來：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="3">for char in &quot;Python&quot;:

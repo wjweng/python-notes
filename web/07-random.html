@@ -148,7 +148,7 @@ print(rand_int)</textarea><pre id="out1"></pre></div>
 <p>輸出結果每個人會不同：</p>
 <pre class="static"><code>9
 7</code></pre>
-<p>注意兩個函數結束值的差別：<code>randrange()</code> 的 <code>stop</code> 和第 06 章的 <code>range()</code> 一樣不包含在內，所以要寫 10 才會產生到 9；<code>randint()</code> 則包含 <code>b</code>，寫 9 就會產生到 9。</p>
+<p>注意兩個函數結束值的差別：<code>randrange()</code> 的 <code>stop</code> 和<a href="https://wjweng.github.io/python-notes/web/06-for-loop.html">第 06 章</a>的 <code>range()</code> 一樣不包含在內，所以要寫 10 才會產生到 9；<code>randint()</code> 則包含 <code>b</code>，寫 9 就會產生到 9。</p>
 <p>每次執行的結果都會不同，這正是隨機的用意。如果想讓隨機的結果可以重現，例如除錯時希望每次都拿到同樣的數字，下一章會介紹怎麼做。</p>
 <h2 id="s5">產生隨機浮點數</h2>
 <p>以下幾個方法可以產生隨機浮點數：</p>
@@ -161,7 +161,7 @@ print(rand_int)</textarea><pre id="out1"></pre></div>
 <pre class="static"><code>random.gauss(mu, sigma)
 random.normalvariate(mu, sigma)</code></pre>
 <ul><li>產生一個平均為 <code>mu</code>、標準差為 <code>sigma</code> 的常態分布的隨機浮點數。</li></ul>
-<p><code>gauss()</code> 和 <code>normalvariate()</code> 產生的都是常態分布的隨機數。根據 Python 官方文件，<code>gauss()</code> 稍微快一些，但在多執行緒（multithreading）的程式裡，兩個執行緒同時呼叫時可能會拿到相同的值；本系列不會用到多執行緒，兩者擇一使用即可。</p>
+<p><code>gauss()</code> 和 <code>normalvariate()</code> 產生的都是常態分布的隨機數。根據 Python 官方文件，<code>gauss()</code> 稍微快一些，但在多執行緒（multithreading）的程式裡，兩個執行緒同時呼叫時可能會拿到相同的值；在本章的練習兩者擇一使用即可。</p>
 <p>以下範例依序用上面五個函數產生隨機浮點數，其中指數分布的 <code>lambd</code> 設為 0.1，兩個常態分布都設為平均 0、標準差 1：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="16">import random
 
@@ -195,7 +195,7 @@ print(rand_float)</textarea><pre id="out2"></pre></div>
 <ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個元素，同一個元素可能被重複取出，並可設定每個元素取出的權重（weights）或累積權重（cum_weights）。</li><li><code>*</code> 後面的 <code>cum_weights</code> 和 <code>k</code> 只能用名稱指定，例如要取出 2 個元素時要寫成 <code>k=2</code>，不能只寫 2。</li></ul>
 <pre class="static"><code>random.sample(x, k)</code></pre>
 <ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個不重複的元素。</li></ul>
-<p>以下範例以第 05 章串列的例子，展示隨機排列與取出元素的結果：</p>
+<p>以下範例以<a href="https://wjweng.github.io/python-notes/web/05-lists.html">第 05 章</a>串列的例子，展示隨機排列與取出元素的結果：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="14">import random
 
 cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
@@ -216,7 +216,7 @@ print(rand_city)</textarea><pre id="out3"></pre></div>
 [&#x27;台北&#x27;, &#x27;桃園&#x27;]
 [&#x27;台北&#x27;, &#x27;台南&#x27;]</code></pre>
 <h3 id="s7"><code>shuffle()</code> 會直接修改原本的串列</h3>
-<p><code>shuffle()</code> 和第 05 章〈直接修改原本串列的方法〉一樣，是直接打亂原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
+<p><code>shuffle()</code> 和<a href="https://wjweng.github.io/python-notes/web/05-lists.html">第 05 章</a>〈直接修改原本串列的方法〉一樣，是直接打亂原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="5">import random
 
 cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]

@@ -67,7 +67,8 @@
       "web_static": [],
       "web_output_differs": [
         "in_venv"
-      ]
+      ],
+      "vocus": "https://vocus.cc/article/61a9cbdffd89780001c9c639"
     },
     {
       "num": "02",
@@ -75,7 +76,8 @@
       "dir": "02-variables-and-types",
       "title": "註解、變數與資料型態",
       "snippet": "# 這是單行註解\nstring_data = \"Hello World!\"\nprint(type(string_data))\n# <class 'str'>\n\nage = int(input(\"How old are you? \"))\nprint(f\"Next year: {age + 1}\")",
-      "web_static": []
+      "web_static": [],
+      "vocus": "https://vocus.cc/article/61adbd7efd897800011372d7"
     },
     {
       "num": "03",
@@ -83,7 +85,8 @@
       "dir": "03-arithmetic",
       "title": "基本數學運算",
       "snippet": "print(8 / 2)         # 4.0\nprint(5 // 2, 5 % 2) # 2 1\nprint(2 ** 3 ** 2)   # 512\nprint(0.1 + 0.2)\n# 0.30000000000000004",
-      "web_static": []
+      "web_static": [],
+      "vocus": "https://vocus.cc/article/61aef814fd89780001c8beb2"
     },
     {
       "num": "04",
@@ -91,7 +94,8 @@
       "dir": "04-conditionals",
       "title": "if 流程控制",
       "snippet": "bmi = 23.1\nif bmi < 18.5:\n    print(\"underweight\")\nelif bmi < 24:\n    print(\"normal weight\")\nelse:\n    print(\"overweight\")",
-      "web_static": []
+      "web_static": [],
+      "vocus": "https://vocus.cc/article/61ae3a00fd8978000109f663"
     },
     {
       "num": "05",
@@ -99,7 +103,8 @@
       "dir": "05-lists",
       "title": "串列（list）",
       "snippet": "city = [\"台北\", \"桃園\", \"新竹\"]\ncity.append(\"台中\")\nprint(city[-1])\nprint(len(city))",
-      "web_static": []
+      "web_static": [],
+      "vocus": "https://vocus.cc/article/61b06c3efd89780001f3adea"
     },
     {
       "num": "06",
@@ -107,7 +112,8 @@
       "dir": "06-for-loop",
       "title": "基本 for 迴圈",
       "snippet": "cities = [\"台北\", \"桃園\", \"新竹\"]\nfor city in cities:\n    print(city)\nfor n in range(0, 11, 2):\n    print(n, end=\" \")",
-      "web_static": []
+      "web_static": [],
+      "vocus": "https://vocus.cc/article/61b1bff0fd89780001f8ae74"
     },
     {
       "num": "07",
@@ -122,7 +128,8 @@
         "random.shuffle(cities)\nprint(cities)",
         "print(random.shuffle(cities))",
         "print(random.choices(cities, k=5))"
-      ]
+      ],
+      "vocus": "https://vocus.cc/article/61b7145dfd897800012b8b09"
     }
   ]
 }

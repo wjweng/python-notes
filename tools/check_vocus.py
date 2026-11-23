@@ -8,7 +8,7 @@
 - 從網頁版複製，可執行的程式碼區塊整段消失、網頁版專屬段落被帶過去
 - 從 VS Code 預覽複製，`./code/` 變成 `file+wsl-…vscode-resource…` 的本機路徑
 
-逐行比對原稿的每一行（含程式碼），並檢查行內程式碼格式、三個連結、本機路徑。
+逐行比對原稿的每一行（含程式碼），並檢查行內程式碼格式、三個連結、連到其他章節的連結、本機路徑。
 任何一項不過 exit 1。
 
 `only:` 區塊在方格子上的處理（見《改版流程》階段 8）：
@@ -160,6 +160,14 @@ def main() -> int:
     for name, link in expected.items():
         if not any(h.rstrip("/") == link for h in hrefs):
             fails.append(f"缺少{name}連結，應為 {link}")
+    # 連到其他章節的連結，方格子上要指向該章的方格子文章（讀者留在方格子）
+    by_dir = {c["dir"]: c for c in json.loads((ROOT / "chapters.json").read_text(encoding="utf-8"))["chapters"]}
+    for target in sorted(set(re.findall(r"\]\(\.\./(\d\d-[a-z0-9-]+)/\)", md))):
+        want = by_dir[target].get("vocus")
+        if not want:
+            fails.append(f"chapters.json 的 {target} 沒有 vocus 網址，無法核對章節連結")
+        elif not any(h.split("?")[0].rstrip("/") == want for h in hrefs):
+            fails.append(f"缺少連到 {target} 的連結，方格子上應為 {want}")
     local = sorted(h for h in hrefs if re.search(r"vscode-resource|localhost|^file:", h))
     if local:
         fails.append(f"連結指到本機路徑：{local[0][:90]}")

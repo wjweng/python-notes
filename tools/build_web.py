@@ -416,6 +416,7 @@ def build(ch: dict) -> tuple[Path, int]:
     md = (ROOT / "chapters" / ch["dir"] / "README.md").read_text(encoding="utf-8")
     md = re.sub(r"^# .*\n", "", md, count=1)          # h1 交給頁面標題
     md = targets.filter_blocks(md, "web")
+    md = targets.chapter_links(md, "web")
     md = targets.absolute_links(md, ch["dir"], f"../chapters/{ch['dir']}")
     content, runnable, toc = render(md, ch.get("web_static", []))
     links = "".join(

@@ -177,6 +177,26 @@ def check_cross_links(text: str, chapter_dir: str) -> list[str]:
     return hits
 
 
+def check_chapter_links(text: str, prose: list[tuple[int, str]]) -> list[str]:
+    """提到其他章節要加連結，連結要指向存在的章節資料夾。
+
+    2026-11-23 weijie 校稿第 07 章：「如果內文有提到其它章節可以補上超連結連到該章節」。
+    寫法是 `[第 05 章](../05-lists/)`，三個版本的網址由 targets.chapter_links() 改寫。
+    還沒建立的章節（例如提到之後才改版的章）沒辦法連，不擋。
+    """
+    dirs = {p.name[:2]: p.name for p in (ROOT / "chapters").iterdir() if p.is_dir()}
+    hits = []
+    for num, line in prose:
+        for m in re.finditer(r"\[[^\]]*\]\(\.\./([^)/]+)/\)", line):
+            if m.group(1) not in dirs.values():
+                hits.append(f"L{num}  章節連結指到不存在的資料夾：{m.group(0)}")
+        bare = re.sub(r"\[[^\]]*\]\([^)]*\)", "", line)
+        for m in re.finditer(r"第 (\d\d) 章", bare):
+            if m.group(1) in dirs:
+                hits.append(f"L{num}  提到{m.group(0)}要加連結：[{m.group(0)}](../{dirs[m.group(1)]}/)")
+    return hits
+
+
 def check_ending(text: str, prose: list[tuple[int, str]]) -> list[str]:
     """收尾要有一段收束（呼應開場），不能像舊文直接貼 GitHub 連結。"""
     tail = [raw.strip() for _, raw in prose if raw.strip()]
@@ -255,6 +275,7 @@ def report(path: Path, quiet: bool) -> bool:
         ("有收尾段", check_ending(text, prose)),
         ("跨版本連結指向本章", check_cross_links(text, path.parent.name)),
         ("函數名稱與運算子用程式碼格式", check_inline_code(prose)),
+        ("提到其他章節要加連結", check_chapter_links(text, prose)),
     ]
 
     sents = sentences(prose)

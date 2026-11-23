@@ -44,6 +44,7 @@ def build(chapter: dict) -> Path:
     src = ROOT / "chapters" / chapter["dir"] / "README.md"
     md = src.read_text(encoding="utf-8")
     md = targets.filter_blocks(md, "colab")
+    md = targets.chapter_links(md, "colab")
     md = targets.absolute_links(md, chapter["dir"], f"{targets.RAW}/{chapter['dir']}")
     nb = {
         "cells": cells(md),
