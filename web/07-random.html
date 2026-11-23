@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>random 模組 — Python 學習筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #569cd6; --bg: #0d1117; --panel: #161b22; --line: #30363d;
+           --text: #e6edf3; --dim: #8b949e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 32px 20px 80px;
+          font-family: 'Noto Sans TC', system-ui, sans-serif; line-height: 1.85; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  /* 側邊目錄。內文置中、目錄固定在左側留白處，所以要等版面夠寬才顯示，
+     否則會壓到內文。780 + 2×260 = 1300，取 1320 當門檻。 */
+  /* 窄版面（例如瀏覽器只開半個螢幕）：目錄收成左下角的浮動按鈕，
+     按鈕上直接顯示讀到哪一節，點開才滑出抽屜，不佔閱讀寬度。 */
+  #tocbtn { position: fixed; left: 16px; bottom: 16px; z-index: 30; max-width: min(58vw, 340px);
+             display: flex; align-items: center; gap: 8px; cursor: pointer;
+             background: var(--panel); color: var(--text); border: 1px solid var(--line);
+             border-radius: 999px; padding: 9px 16px 9px 13px; font: inherit; font-size: 13.5px;
+             box-shadow: 0 6px 20px rgba(1, 4, 9, .5); }
+  #tocbtn:hover { border-color: var(--accent); }
+  #tocbtn .ic { color: var(--accent); font-size: 15px; line-height: 1; }
+  #tocbtn .now { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                  color: var(--dim); }
+  #tocveil { position: fixed; inset: 0; z-index: 35; display: none;
+              background: rgba(1, 4, 9, .6); }
+  #toc { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh;
+          width: min(300px, 86vw); padding: 24px 12px 24px 20px;
+          background: var(--panel); border-right: 1px solid var(--line);
+          transform: translateX(-102%); transition: transform .22s ease;
+          display: flex; flex-direction: column; }
+  body.toc-open #toc { transform: none; }
+  body.toc-open #tocveil { display: block; }
+  #toc .home { display: inline-block; flex: 0 0 auto; font-size: 13px; color: var(--dim);
+                text-decoration: none; border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 11px; margin-bottom: 18px; align-self: flex-start; }
+  #toc .home:hover { color: var(--accent); border-color: var(--accent); }
+  #toc .label { flex: 0 0 auto; font-size: 12px; letter-spacing: .16em; color: var(--dim);
+                 margin-bottom: 10px; }
+  #toc nav { overflow-y: auto; min-height: 0; }
+  #toc a.item { display: block; font-size: 13.5px; line-height: 1.5; color: var(--dim);
+                 text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent;
+                 transition: color .15s, border-color .15s; }
+  #toc a.item:hover { color: var(--text); }
+  #toc a.lv3 { padding-left: 24px; font-size: 12.5px; }
+  #toc a.item.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  @media (min-width: 1320px) {
+    #tocbtn, #tocveil { display: none; }
+    #toc { left: 18px; width: 244px; padding: 30px 0 40px; z-index: 10;
+            background: none; border-right: 0; transform: none; }
+  }
+  .unit { color: var(--accent); font-size: 14px; font-weight: 500; letter-spacing: .16em; }
+  h1 { font-size: 34px; font-weight: 900; margin: 8px 0 26px; line-height: 1.3; }
+  h2 { font-size: 23px; font-weight: 700; margin: 46px 0 14px; padding-top: 14px;
+        border-top: 1px solid var(--line); }
+  h3 { font-size: 18px; font-weight: 700; margin: 30px 0 10px; color: var(--accent); }
+  h2, h3 { scroll-margin-top: 22px; }  /* 從目錄跳過來時不要貼齊視窗上緣 */
+  p { margin: 14px 0; }
+  a { color: var(--accent); }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
+          background: #1f2430; padding: 2px 6px; border-radius: 4px; }
+  pre.static { background: #010409; border: 1px solid var(--line); border-radius: 8px;
+                padding: 14px 16px; overflow-x: auto; margin: 16px 0; }
+  pre.static code { background: none; padding: 0; font-size: 13.5px; line-height: 1.7; }
+  .tablewrap { overflow-x: auto; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; }
+  th { background: var(--panel); font-weight: 700; }
+  blockquote { border-left: 3px solid var(--accent); margin: 18px 0; padding: 6px 16px;
+                color: var(--dim); background: #12171f; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 6px 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 38px 0; }
+  img { max-width: 100%; height: auto; display: block; margin: 20px auto 6px;
+         border: 1px solid var(--line); border-radius: 8px; cursor: zoom-in; }
+  .cap { display: block; text-align: center; font-size: 13px; color: var(--dim);
+          margin-bottom: 22px; }
+  /* 點圖放大：截圖是 4K 全螢幕，縮到內文寬度會看不清楚 */
+  #lightbox { position: fixed; inset: 0; z-index: 50; display: none;
+               background: rgba(1, 4, 9, .93); cursor: zoom-out;
+               padding: 24px 24px 44px; place-items: center; overflow: auto; }
+  #lightbox.on { display: grid; }
+  /* 放大到視窗大小就好，超出視窗反而要捲動才看得完。
+     高度用 vh 而不是 %：grid 的列高不定時，百分比的 max-height 會失效。 */
+  #lightbox img { max-width: 100%; max-height: calc(100vh - 68px); width: auto; height: auto;
+                   margin: 0; border: 0; border-radius: 4px; cursor: zoom-out; }
+  #lightbox .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center;
+                     color: var(--dim); font-size: 13px; pointer-events: none; }
+  .demo { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 18px 0; }
+  .head { background: var(--panel); padding: 8px 13px; font-size: 13px; color: var(--dim);
+           display: flex; justify-content: space-between; align-items: center; }
+  .name { font-size: 12.5px; }
+  textarea { width: 100%; border: 0; background: #010409; color: var(--text); display: block;
+              font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px;
+              line-height: 1.7; padding: 14px 16px; resize: vertical; outline: none; }
+  button { background: var(--accent); color: #0d1117; border: 0; border-radius: 5px;
+            padding: 4px 15px; font-weight: 700; cursor: pointer; font-size: 13px;
+            font-family: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  pre[id^="out"] { margin: 0; padding: 12px 16px; background: var(--panel);
+                    border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+                    font-size: 13.5px; white-space: pre-wrap; min-height: 42px; color: #9ad1c4; }
+  pre.err { color: #ff7b72 !important; }
+  #boot { position: sticky; top: 0; z-index: 9; background: var(--panel); color: var(--dim);
+           font-size: 13px; padding: 9px 14px; border: 1px solid var(--line);
+           border-radius: 7px; margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="unit">單元二・串列與迴圈</div>
+  <h1>random 模組</h1>
+  <div id="boot">Python 執行環境載入中⋯⋯（第一次約需 10 秒，之後由瀏覽器快取）</div>
+<p>當我們需要在程式中模擬或實作一些隨機發生的事件，例如模擬猜拳、丟骰子的結果，便需要程式可以根據開發者輸入的數值範圍、型態等，隨機產生一個結果，而 Python 的 random 模組便是用於實現這個功能。</p>
+<h2 id="s1">匯入 random 模組</h2>
+<p>使用 <code>import</code> 匯入 random 模組。</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn0" onclick="run(0)" disabled>執行</button></div><textarea id="code0" spellcheck="false" rows="3">import random</textarea><pre id="out0"></pre></div>
+<p>匯入之後，就可以用「模組名稱.函數名稱」的方式呼叫模組裡的函數，例如 <code>random.randint()</code>，中間的 <code>.</code> 代表這個函數屬於 random 模組。模組的完整觀念會在後面的章節介紹，這一章只要記得使用前先匯入、呼叫時加上 <code>random.</code> 就可以了。</p>
+<h3 id="s2">忘了匯入模組</h3>
+<p>如果忘了寫 <code>import random</code> 就直接呼叫，例如：</p>
+<pre class="static"><code>print(random.randint(1, 9))</code></pre>
+<p>錯誤訊息的最後一行如下，Python 也會提示我們是不是忘了匯入：</p>
+<pre class="static"><code>NameError: name &#x27;random&#x27; is not defined. Did you forget to import &#x27;random&#x27;?</code></pre>
+<h3 id="s3">檔案不要取名為 <code>random.py</code></h3>
+<p>如果把自己的程式存成 <code>random.py</code>，<code>import random</code> 匯入的會是這個檔案本身，而不是 Python 內建的 random 模組，因此呼叫 <code>random.randint()</code> 時就會找不到這個函數。例如以下的程式存成 <code>random.py</code> 並執行：</p>
+<pre class="static"><code>import random
+print(random.randint(1, 9))</code></pre>
+<p>錯誤訊息的最後一行很長，開頭如下：</p>
+<pre class="static"><code>AttributeError: module &#x27;random&#x27; has no attribute &#x27;randint&#x27;</code></pre>
+<p>這一行的後面，Python 會接著提示這個檔案和內建的 random 模組同名，建議我們把檔案改名（consider renaming）。遇到這個錯誤時，把檔案改成其他名字，例如本章範例使用的 <code>01_random_int.py</code> 就可以了。</p>
+<h2 id="s4">產生隨機整數</h2>
+<p>以下幾個方法可以產生指定區間的隨機整數：</p>
+<pre class="static"><code>random.randrange([start, ]stop[, step])</code></pre>
+<ul><li><code>start</code>：指定區間的起始值，若沒有輸入則預設為 0。</li><li><code>stop</code>：指定區間的結束值，不包含 <code>stop</code>。</li><li><code>step</code>：區間遞增的間隔，若沒有輸入則預設為 1。</li></ul>
+<pre class="static"><code>random.randint(a, b)</code></pre>
+<ul><li>產生一個 [<code>a</code>, <code>b</code>] 區間內的隨機整數。</li></ul>
+<p>例如，以下的程式碼會隨機產生 1 到 9 之間的整數：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn1" onclick="run(1)" disabled>執行</button></div><textarea id="code1" spellcheck="false" rows="7">import random
+
+rand_int = random.randrange(1, 10, 1)
+print(rand_int)
+
+rand_int = random.randint(1, 9)
+print(rand_int)</textarea><pre id="out1"></pre></div>
+<p>輸出結果每個人會不同：</p>
+<pre class="static"><code>9
+7</code></pre>
+<p>注意兩個函數結束值的差別：<code>randrange()</code> 的 <code>stop</code> 和第 06 章的 <code>range()</code> 一樣不包含在內，所以要寫 10 才會產生到 9；<code>randint()</code> 則包含 <code>b</code>，寫 9 就會產生到 9。</p>
+<p>每次執行的結果都會不同，這正是隨機的用意。如果想讓隨機的結果可以重現，例如除錯時希望每次都拿到同樣的數字，下一章會介紹怎麼做。</p>
+<h2 id="s5">產生隨機浮點數</h2>
+<p>以下幾個方法可以產生隨機浮點數：</p>
+<pre class="static"><code>random.random()</code></pre>
+<ul><li>產生一個 [0.0, 1.0) 區間內的隨機浮點數。</li></ul>
+<pre class="static"><code>random.uniform(a, b)</code></pre>
+<ul><li>產生一個 [<code>a</code>, <code>b</code>]（如果 <code>a &lt;= b</code>）或 [<code>b</code>, <code>a</code>]（如果 <code>b &lt; a</code>）區間內的隨機浮點數。</li></ul>
+<pre class="static"><code>random.expovariate(lambd)</code></pre>
+<ul><li>產生一個服從指數分布的隨機浮點數，<code>lambd</code> 是期望平均值的倒數。參數名稱少了一個字母 a，是因為 <code>lambda</code> 在 Python 裡是保留字，不能拿來當參數名稱。</li></ul>
+<pre class="static"><code>random.gauss(mu, sigma)
+random.normalvariate(mu, sigma)</code></pre>
+<ul><li>產生一個平均為 <code>mu</code>、標準差為 <code>sigma</code> 的常態分布的隨機浮點數。</li></ul>
+<p><code>gauss()</code> 和 <code>normalvariate()</code> 產生的都是常態分布的隨機數。根據 Python 官方文件，<code>gauss()</code> 稍微快一些，但在多執行緒（multithreading）的程式裡，兩個執行緒同時呼叫時可能會拿到相同的值；本系列不會用到多執行緒，兩者擇一使用即可。</p>
+<p>以下範例依序用上面五個函數產生隨機浮點數，其中指數分布的 <code>lambd</code> 設為 0.1，兩個常態分布都設為平均 0、標準差 1：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn2" onclick="run(2)" disabled>執行</button></div><textarea id="code2" spellcheck="false" rows="16">import random
+
+rand_float = random.random()
+print(rand_float)
+
+rand_float = random.uniform(0, 1)
+print(rand_float)
+
+rand_float = random.expovariate(0.1)
+print(rand_float)
+
+rand_float = random.gauss(0, 1)
+print(rand_float)
+
+rand_float = random.normalvariate(0, 1)
+print(rand_float)</textarea><pre id="out2"></pre></div>
+<p>輸出結果同樣每個人會不同：</p>
+<pre class="static"><code>0.8625930391422392
+0.7556453212005825
+0.13170214600390084
+0.5748607231832283
+-0.09085395755220001</code></pre>
+<h2 id="s6">隨機排列與取出元素</h2>
+<p>和隨機整數及隨機浮點數相同，我們也可在一組序列資料中隨機取出一筆資料或資料集合：</p>
+<pre class="static"><code>random.shuffle(x)</code></pre>
+<ul><li>使序列資料 <code>x</code> 重新隨機排列。</li></ul>
+<pre class="static"><code>random.choice(x)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出一個元素。</li></ul>
+<pre class="static"><code>random.choices(x, weights=None, *, cum_weights=None, k=1)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個元素，同一個元素可能被重複取出，並可設定每個元素取出的權重（weights）或累積權重（cum_weights）。</li><li><code>*</code> 後面的 <code>cum_weights</code> 和 <code>k</code> 只能用名稱指定，例如要取出 2 個元素時要寫成 <code>k=2</code>，不能只寫 2。</li></ul>
+<pre class="static"><code>random.sample(x, k)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個不重複的元素。</li></ul>
+<p>以下範例以第 05 章串列的例子，展示隨機排列與取出元素的結果：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="14">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+random.shuffle(cities)
+print(cities)
+
+rand_city = random.choice(cities)
+print(rand_city)
+
+rand_city = random.choices(cities, [10, 20, 30, 40, 50], k=2)
+print(rand_city)
+
+rand_city = random.sample(cities, 2)
+print(rand_city)</textarea><pre id="out3"></pre></div>
+<p>輸出結果也是每個人會不同：</p>
+<pre class="static"><code>[&#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;新竹&#x27;, &#x27;桃園&#x27;, &#x27;台北&#x27;]
+桃園
+[&#x27;台北&#x27;, &#x27;桃園&#x27;]
+[&#x27;台北&#x27;, &#x27;台南&#x27;]</code></pre>
+<h3 id="s7"><code>shuffle()</code> 會直接修改原本的串列</h3>
+<p><code>shuffle()</code> 和第 05 章〈直接修改原本串列的方法〉一樣，是直接打亂原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn4" onclick="run(4)" disabled>執行</button></div><textarea id="code4" spellcheck="false" rows="5">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.shuffle(cities))
+print(cities)</textarea><pre id="out4"></pre></div>
+<p>執行結果（第二行每個人會不同）：</p>
+<pre class="static"><code>None
+[&#x27;台北&#x27;, &#x27;新竹&#x27;, &#x27;台南&#x27;, &#x27;桃園&#x27;, &#x27;台中&#x27;]</code></pre>
+<p>也因為 <code>shuffle()</code> 要修改原本的資料，它不能用在字串這種無法修改的序列上：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn5" onclick="run(5)" disabled>執行</button></div><textarea id="code5" spellcheck="false" rows="3">import random
+
+random.shuffle(&quot;Python&quot;)</textarea><pre id="out5"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>TypeError: &#x27;str&#x27; object does not support item assignment</code></pre>
+<h3 id="s8"><code>choices()</code> 與 <code>sample()</code> 的差別</h3>
+<p><code>choices()</code> 和 <code>sample()</code> 都可以一次取出好幾個元素，差別在於 <code>choices()</code> 每次都從完整的串列裡取，同一個元素可能被取出好幾次；<code>sample()</code> 取出的元素則不會重複。以下兩者都從 5 個城市裡取出 5 個：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn6" onclick="run(6)" disabled>執行</button></div><textarea id="code6" spellcheck="false" rows="5">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.choices(cities, k=5))
+print(random.sample(cities, 5))</textarea><pre id="out6"></pre></div>
+<p>輸出結果每個人會不同，這次 <code>choices()</code> 的結果裡「桃園」和「台北」都出現了兩次，<code>sample()</code> 則剛好是 5 個城市各一次：</p>
+<pre class="static"><code>[&#x27;台南&#x27;, &#x27;桃園&#x27;, &#x27;桃園&#x27;, &#x27;台北&#x27;, &#x27;台北&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;新竹&#x27;]</code></pre>
+<p>也因為 <code>sample()</code> 不會重複，要取出的個數不能超過串列的長度：</p>
+<div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn7" onclick="run(7)" disabled>執行</button></div><textarea id="code7" spellcheck="false" rows="4">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.sample(cities, 6))</textarea><pre id="out7"></pre></div>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ValueError: Sample larger than population or is negative</code></pre>
+<hr>
+<p>這一章我們學會了匯入 random 模組，以及產生隨機整數、隨機浮點數，和從串列中隨機排列與取出元素的方法。遇到 <code>NameError</code> 時，可以先檢查是不是忘了匯入模組；遇到 <code>AttributeError</code> 時，則可以確認自己的檔案是不是取名為 <code>random.py</code>。</p>
+<h2 id="s9">本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/07-random/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/07-random.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li></ul>
+</div>
+<button id="tocbtn" type="button" aria-expanded="false" aria-controls="toc">
+  <span class="ic">☰</span><span class="now">本章目錄</span>
+</button>
+<div id="tocveil"></div>
+<aside id="toc">
+  <a class="home" href="../index.html">← 回首頁</a>
+  <div class="label">本章目錄</div>
+  <nav><a class="item lv2" href="#s1" data-id="s1">匯入 random 模組</a><a class="item lv3" href="#s2" data-id="s2">忘了匯入模組</a><a class="item lv3" href="#s3" data-id="s3">檔案不要取名為 random.py</a><a class="item lv2" href="#s4" data-id="s4">產生隨機整數</a><a class="item lv2" href="#s5" data-id="s5">產生隨機浮點數</a><a class="item lv2" href="#s6" data-id="s6">隨機排列與取出元素</a><a class="item lv3" href="#s7" data-id="s7">shuffle() 會直接修改原本的串列</a><a class="item lv3" href="#s8" data-id="s8">choices() 與 sample() 的差別</a><a class="item lv2" href="#s9" data-id="s9">本章程式碼</a></nav>
+</aside>
+<div id="lightbox"><img alt=""><span class="hint">點任意處或按 Esc 關閉</span></div>
+<script>
+// 目錄跟著閱讀位置走。用捲動位置判斷而不是 IntersectionObserver：
+// 標題之間可能隔很遠，交錯進出視窗時 observer 會來回跳。
+const tocLinks = [...document.querySelectorAll("#toc a.item")];
+const heads = tocLinks.map(a => document.getElementById(a.dataset.id)).filter(Boolean);
+function syncToc() {
+  if (!heads.length) return;
+  const line = 120;  // 視窗上緣往下一點，當作「正在讀這裡」的判定線
+  let idx = 0;
+  heads.forEach((h, i) => { if (h.getBoundingClientRect().top <= line) idx = i; });
+  // 捲到最底時，直接標最後一節，否則永遠讀不到
+  if (innerHeight + scrollY >= document.body.scrollHeight - 4) idx = heads.length - 1;
+  tocLinks.forEach((a, i) => a.classList.toggle("on", i === idx));
+  // 窄版面看不到側欄，把目前段落寫在浮動按鈕上，讀者仍然知道自己在哪
+  document.querySelector("#tocbtn .now").textContent = tocLinks[idx].textContent;
+  const cur = tocLinks[idx];
+  const box = cur.parentElement;
+  if (cur.offsetTop < box.scrollTop || cur.offsetTop > box.scrollTop + box.clientHeight - 40) {
+    box.scrollTop = cur.offsetTop - box.clientHeight / 2;
+  }
+}
+
+// 窄版面的抽屜
+const btn = document.getElementById("tocbtn");
+const veil = document.getElementById("tocveil");
+function setDrawer(open) {
+  document.body.classList.toggle("toc-open", open);
+  btn.setAttribute("aria-expanded", String(open));
+}
+btn.addEventListener("click", () => setDrawer(!document.body.classList.contains("toc-open")));
+veil.addEventListener("click", () => setDrawer(false));
+// 點了目錄項目就跳段並收起來（寬版面沒有抽屜，關掉也不影響）
+tocLinks.forEach(a => a.addEventListener("click", () => setDrawer(false)));
+addEventListener("keydown", e => { if (e.key === "Escape") setDrawer(false); });
+
+addEventListener("scroll", syncToc, { passive: true });
+addEventListener("resize", syncToc);
+syncToc();
+
+// 點圖放大。原圖是 4K 螢幕截圖，內文寬度只有 780px，不放大看不到細節。
+const lb = document.getElementById("lightbox");
+const lbImg = lb.querySelector("img");
+document.querySelectorAll(".wrap img").forEach(img => {
+  img.addEventListener("click", () => {
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add("on");
+    lb.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+  });
+});
+function closeLightbox() {
+  lb.classList.remove("on");
+  document.body.style.overflow = "";
+}
+lb.addEventListener("click", closeLightbox);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+</script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+async function boot() {
+  const tip = document.getElementById("boot");
+  try {
+    pyodide = await loadPyodide();
+    tip.textContent = "執行環境就緒 ✓　程式碼可以直接改，改完按「執行」";
+    document.querySelectorAll(".demo button").forEach(b => b.disabled = false);
+  } catch (e) {
+    tip.textContent = "執行環境載入失敗，程式碼仍可閱讀：" + e;
+  }
+}
+async function run(i) {
+  const out = document.getElementById("out" + i);
+  out.className = "";
+  out.textContent = "";
+  try {
+    // 用 write 而不是 batched：input() 的提示文字沒有換行，batched 會等到換行才送出，
+    // 讀者就看不到提示。write 收到什麼就印什麼。
+    const decoder = new TextDecoder();
+    const write = (buf) => { out.textContent += decoder.decode(buf, { stream: true }); return buf.length; };
+    pyodide.setStdout({ write });
+    pyodide.setStderr({ write });
+    // Pyodide 預設沒有 stdin，input() 會丟 OSError。改成跳出輸入框，
+    // 並把輸入的內容補進輸出，看起來跟終端機一樣。按取消等於 EOF。
+    pyodide.setStdin({ stdin: () => {
+      const lastLine = out.textContent.split("\n").pop();
+      const v = window.prompt(lastLine || "請輸入");
+      if (v === null) { out.textContent += "\n"; return null; }
+      out.textContent += v + "\n";
+      return v;
+    } });
+    let error = null;
+    try {
+      await pyodide.runPythonAsync(document.getElementById("code" + i).value);
+    } catch (e) {
+      error = e;
+    }
+    // sys.stdout 是行緩衝：print(x, end=" ") 這種沒有換行結尾的輸出會留在 Python 的緩衝區，
+    // 要等下一段程式印出換行才吐出來，結果跑到別段的輸出框。每段跑完都主動 flush。
+    pyodide.runPython("import sys\nsys.stdout.flush()\nsys.stderr.flush()");
+    if (error) throw error;
+    if (!out.textContent.trim()) out.textContent = "（這段程式沒有輸出）";
+  } catch (e) {
+    out.className = "err";
+    // 錯誤訊息從讀者的程式（<exec>）那一層開始顯示，略過 Pyodide 內部的呼叫層
+    const lines = String(e).split("\n");
+    const start = lines.findIndex(l => l.includes('File "<exec>"'));
+    out.textContent += (start >= 0 ? lines.slice(start) : lines.slice(-6)).join("\n");
+  }
+}
+boot();
+</script>
+</body>
+</html>

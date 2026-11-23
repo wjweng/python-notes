@@ -108,6 +108,21 @@
       "title": "基本 for 迴圈",
       "snippet": "cities = [\"台北\", \"桃園\", \"新竹\"]\nfor city in cities:\n    print(city)\nfor n in range(0, 11, 2):\n    print(n, end=\" \")",
       "web_static": []
+    },
+    {
+      "num": "07",
+      "unit": 2,
+      "dir": "07-random",
+      "title": "random 模組",
+      "snippet": "import random\nprint(random.randint(1, 9))\ncities = [\"台北\", \"桃園\", \"新竹\"]\nprint(random.choice(cities))",
+      "web_static": [],
+      "web_output_differs": [
+        "rand_int = random.randrange",
+        "rand_float = random.random()",
+        "random.shuffle(cities)\nprint(cities)",
+        "print(random.shuffle(cities))",
+        "print(random.choices(cities, k=5))"
+      ]
     }
   ]
 }
