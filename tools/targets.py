@@ -41,6 +41,9 @@ weijie 從那一頁複製貼上，貼完再由 check_vocus.py 核對（2026-11-2
 
 讀者不在網頁版也不在 Colab，`only:` 段落只要有 `github` 就保留（兩個導流連結都放），
 不含 `github` 的（例如 `only:web`）拿掉。
+
+每章 README 最後一行是方格子專用版的網址，寫成 HTML 註解：GitHub 上看不到，
+VS Code 開原稿就找得到（2026-11-23 weijie 要求，不另外記網址），由 check_style.py 檢查。
 """
 import json
 from pathlib import Path
@@ -54,6 +57,7 @@ BLOB = f"https://github.com/{REPO}/blob/{BRANCH}/chapters"
 
 BLOCK = re.compile(r"[ \t]*<!--\s*only:([a-z,\s]+?)\s*-->\n(.*?)[ \t]*<!--\s*/only\s*-->\n?",
                    re.S)
+COMMENT = re.compile(r"^[ \t]*<!--.*?-->[ \t]*\n?", re.M)
 IMG = re.compile(r"!\[([^\]]*)\]\((?!https?://|data:)([^)]+)\)")
 PAGES = "https://wjweng.github.io/python-notes/web"
 COLAB = f"https://colab.research.google.com/github/{REPO}/blob/{BRANCH}/notebooks"
@@ -72,7 +76,9 @@ def filter_blocks(md: str, target: str) -> str:
         if target == "vocus":
             return m.group(2) if "github" in targets else ""
         return m.group(2) if target in targets else ""
-    return BLOCK.sub(keep, md)
+    md = BLOCK.sub(keep, md)
+    # 其餘整行的 HTML 註解（例如章末的方格子專用版網址）只給寫稿的人看，產生器一律拿掉
+    return COMMENT.sub("", md)
 
 
 def chapter_links(md: str, target: str) -> str:

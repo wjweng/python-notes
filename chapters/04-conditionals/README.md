@@ -307,3 +307,5 @@ Your BMI is 23.148148148148145, and you have a normal weight.
 ## 參考資料
 
 [1] [成人健康體位標準](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=542&pid=9737)
+
+<!-- 方格子專用版（貼方格子時從這裡複製）：https://wjweng.github.io/python-notes/vocus/04-conditionals.html -->

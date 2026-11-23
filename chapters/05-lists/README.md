@@ -381,3 +381,5 @@ print(city)
 <!-- only:github,colab -->
 - [在瀏覽器直接執行](https://wjweng.github.io/python-notes/web/05-lists.html) — 不用登入，開啟就能改程式碼看結果
 <!-- /only -->
+
+<!-- 方格子專用版（貼方格子時從這裡複製）：https://wjweng.github.io/python-notes/vocus/05-lists.html -->

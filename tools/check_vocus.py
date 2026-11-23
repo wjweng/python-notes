@@ -81,6 +81,8 @@ def source_lines(md: str) -> list[tuple[int, str, str, str]]:
             if ONLY_CLOSE.search(line):
                 targets = None
                 continue
+            if re.fullmatch(r"\s*<!--.*-->\s*", line):   # 其他註解（方格子專用版網址）不上頁面
+                continue
             if i == 1 and line.startswith("# "):
                 continue
         text = line if in_fence else prose_text(line)

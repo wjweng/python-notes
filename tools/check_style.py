@@ -57,6 +57,8 @@ def split_blocks(text: str) -> tuple[list[str], list[tuple[int, str]]]:
         if line.lstrip().startswith("```"):
             in_fence = not in_fence
             continue
+        if not in_fence and re.fullmatch(r"\s*<!--.*-->\s*", line):
+            continue  # HTML 註解不是內文
         (code if in_fence else prose).append(line if in_fence else (i, line))
     return code, prose
 
@@ -166,7 +168,7 @@ def check_cross_links(text: str, chapter_dir: str) -> list[str]:
     hits = []
     for m in re.finditer(r"https://wjweng\.github\.io/python-notes/(\S*?)[)\s]", text):
         path = m.group(1)
-        if path != f"web/{chapter_dir}.html":
+        if path not in (f"web/{chapter_dir}.html", f"vocus/{chapter_dir}.html"):
             hits.append(f"網頁版連結指到 /{path or ''}，應該是 /web/{chapter_dir}.html")
     for m in re.finditer(r"colab\.research\.google\.com/\S*?/notebooks/(\S*?)\.ipynb", text):
         if m.group(1) != chapter_dir:
@@ -195,6 +197,18 @@ def check_chapter_links(text: str, prose: list[tuple[int, str]]) -> list[str]:
             if m.group(1) in dirs:
                 hits.append(f"L{num}  提到{m.group(0)}要加連結：[{m.group(0)}](../{dirs[m.group(1)]}/)")
     return hits
+
+
+VOCUS_NOTE = "<!-- 方格子專用版（貼方格子時從這裡複製）：https://wjweng.github.io/python-notes/vocus/{}.html -->"
+
+
+def check_vocus_note(text: str, chapter_dir: str) -> list[str]:
+    """最後一行是本章方格子專用版的網址（HTML 註解，GitHub 上看不到）。
+
+    2026-11-23 weijie：貼方格子時不想另外記網址，從原稿就找得到。
+    """
+    want = VOCUS_NOTE.format(chapter_dir)
+    return [] if text.rstrip("\n").splitlines()[-1] == want else [f"最後一行要是：{want}"]
 
 
 def check_ending(text: str, prose: list[tuple[int, str]]) -> list[str]:
@@ -276,6 +290,7 @@ def report(path: Path, quiet: bool) -> bool:
         ("跨版本連結指向本章", check_cross_links(text, path.parent.name)),
         ("函數名稱與運算子用程式碼格式", check_inline_code(prose)),
         ("提到其他章節要加連結", check_chapter_links(text, prose)),
+        ("最後一行是方格子專用版網址", check_vocus_note(text, path.parent.name)),
     ]
 
     sents = sentences(prose)
