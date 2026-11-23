@@ -186,7 +186,7 @@ for score in scores_list:
 <p>執行結果：</p>
 <pre class="static"><code>[97, 97, 72, 63, 60, 57, 32, 17, 15, 8]
 97 97 72 63</code></pre>
-<p>這裡用了<a href="https://wjweng.github.io/python-notes/web/08-random-seed.html">第 08 章</a>的 <code>random.seed(1)</code> 固定種子，所以每次執行都會產生同一串數字，方便對照結果。第一個 for 迴圈只是用來重複執行十遍，迴圈變數用不到，因此同樣取名為底線 <code>_</code>。第二個 for 迴圈印到 63 之後，下一個數字是 60，不大於 60，於是執行 break 跳出迴圈，後面的 57、32 等數字就不會再檢查了。</p>
+<p>這裡用了<a href="https://wjweng.github.io/python-notes/web/08-random-seed.html">第 08 章</a>的 <code>random.seed(1)</code> 固定種子，所以每次執行都會產生同一串數字，方便對照結果。第一個 for 迴圈只是用來重複執行十遍，迴圈變數用不到，因此取名為底線 <code>_</code>。第二個 for 迴圈印到 63 之後，下一個數字是 60，不大於 60，於是執行 break 跳出迴圈，後面的 57、32 等數字就不會再檢查了。</p>
 <h3 id="s4"><code>sort()</code> 方法</h3>
 <p><code>sort()</code> 會把串列裡的元素由小到大排列，加上 <code>reverse=True</code> 則改成由大到小。它和<a href="https://wjweng.github.io/python-notes/web/07-random.html">第 07 章</a>的 <code>shuffle()</code> 一樣，是直接修改原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
 <div class="demo"><div class="head"><span class="name">可以改改看，按執行</span><button id="btn3" onclick="run(3)" disabled>執行</button></div><textarea id="code3" spellcheck="false" rows="5">numbers = [3, 1, 2]

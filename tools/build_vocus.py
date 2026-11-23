@@ -63,8 +63,8 @@ PAGE = """<!doctype html>
     <b>第 {num} 章　{title}</b>（方格子專用版，產生於 commit 當下的原稿）<br>
     <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
     <ol>
-      <li>按「複製內文」，到方格子{target}全選內文、貼上。標題另外填</li>
-      {image_note}<li>貼完跑 <code>python3 tools/check_vocus.py {num} &lt;文章網址&gt;</code></li>
+      <li>按「複製內文」，到方格子{target}全選內文、貼上。標題另外填；圖和圖說會一起貼過去，不用另外上傳</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py {num} &lt;文章網址&gt;</code></li>
     </ol>
   </div>
   <article id="article">
@@ -74,22 +74,16 @@ PAGE = """<!doctype html>
 <script>
 const article = document.getElementById("article");
 const msg = document.getElementById("msg");
-document.getElementById("copy").addEventListener("click", async () => {{
-  try {{
-    await navigator.clipboard.write([new ClipboardItem({{
-      "text/html": new Blob([article.innerHTML], {{ type: "text/html" }}),
-      "text/plain": new Blob([article.innerText], {{ type: "text/plain" }}),
-    }})]);
-    msg.textContent = "已複製 ✓";
-  }} catch (e) {{
-    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
-    const range = document.createRange();
-    range.selectNodeContents(article);
-    const sel = getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
-  }}
+document.getElementById("copy").addEventListener("click", () => {{
+  // 用「選取整篇再複製」，跟滑鼠選取按 Ctrl+C 完全一樣。不要改回 navigator.clipboard.write：
+  // 2026-11-23 第 10 章實測，那樣寫進剪貼簿的 HTML 貼到方格子後，清單裡的三個連結都不見了，
+  // 內文段落裡的連結卻還在；同一頁用滑鼠選取複製，連結全都在。
+  const range = document.createRange();
+  range.selectNodeContents(article);
+  const sel = getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
 }});
 </script>
 </body>
@@ -107,19 +101,17 @@ def build(ch: dict) -> Path:
     content, _, _ = render(md, [], [])
     # render() 給標題加了目錄用的 id，方格子用不到
     content = re.sub(r'<(h[23]) id="s\d+">', r"<\1>", content)
-    # 圖片說明在網頁版是 <span class="cap">，方格子的圖說要另外填，這裡只留圖
-    has_images = "<img " in content
+    # 圖說在網頁版是 <span class="cap">。方格子貼上時會把 <img> 的 alt 當成圖說（第 10 章實測），
+    # 這裡再留一份文字就重複了
     content = re.sub(r'<span class="cap">[^<]*</span>', "", content)
     if ch.get("vocus"):
         target = f'的<a href="{ch["vocus"]}">這篇文章</a>（編輯模式）'
     else:
         target = "新增一篇文章，發布後把網址補進 chapters.json 的 <code>vocus</code>，"
-    image_note = ("<li>這一章有圖：圖片要在方格子另外上傳，並填圖說</li>\n      "
-                  if has_images else "")
     OUT.mkdir(exist_ok=True)
     dst = OUT / f"{ch['dir']}.html"
     dst.write_text(PAGE.format(num=ch["num"], title=html.escape(ch["title"]), target=target,
-                               image_note=image_note, content=content), encoding="utf-8")
+                               content=content), encoding="utf-8")
     return dst
 
 

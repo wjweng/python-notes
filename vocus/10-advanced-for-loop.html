@@ -34,8 +34,7 @@
     <b>第 10 章　進階 for 迴圈</b>（方格子專用版，產生於 commit 當下的原稿）<br>
     <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
     <ol>
-      <li>按「複製內文」，到方格子新增一篇文章，發布後把網址補進 chapters.json 的 <code>vocus</code>，全選內文、貼上。標題另外填</li>
-      <li>這一章有圖：圖片要在方格子另外上傳，並填圖說</li>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61b9b4befd89780001666354">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填；圖和圖說會一起貼過去，不用另外上傳</li>
       <li>貼完跑 <code>python3 tools/check_vocus.py 10 &lt;文章網址&gt;</code></li>
     </ol>
   </div>
@@ -112,7 +111,7 @@ for score in scores_list:
 <p>執行結果：</p>
 <pre class="static"><code>[97, 97, 72, 63, 60, 57, 32, 17, 15, 8]
 97 97 72 63</code></pre>
-<p>這裡用了<a href="https://vocus.cc/article/61b80be7fd897800012d5ad8">第 08 章</a>的 <code>random.seed(1)</code> 固定種子，所以每次執行都會產生同一串數字，方便對照結果。第一個 for 迴圈只是用來重複執行十遍，迴圈變數用不到，因此同樣取名為底線 <code>_</code>。第二個 for 迴圈印到 63 之後，下一個數字是 60，不大於 60，於是執行 break 跳出迴圈，後面的 57、32 等數字就不會再檢查了。</p>
+<p>這裡用了<a href="https://vocus.cc/article/61b80be7fd897800012d5ad8">第 08 章</a>的 <code>random.seed(1)</code> 固定種子，所以每次執行都會產生同一串數字，方便對照結果。第一個 for 迴圈只是用來重複執行十遍，迴圈變數用不到，因此取名為底線 <code>_</code>。第二個 for 迴圈印到 63 之後，下一個數字是 60，不大於 60，於是執行 break 跳出迴圈，後面的 57、32 等數字就不會再檢查了。</p>
 <h3><code>sort()</code> 方法</h3>
 <p><code>sort()</code> 會把串列裡的元素由小到大排列，加上 <code>reverse=True</code> 則改成由大到小。它和<a href="https://vocus.cc/article/61b7145dfd897800012b8b09">第 07 章</a>的 <code>shuffle()</code> 一樣，是直接修改原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
 <pre class="static"><code class="lang-python">numbers = [3, 1, 2]
@@ -234,22 +233,16 @@ print(i)</code></pre>
 <script>
 const article = document.getElementById("article");
 const msg = document.getElementById("msg");
-document.getElementById("copy").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.write([new ClipboardItem({
-      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
-      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
-    })]);
-    msg.textContent = "已複製 ✓";
-  } catch (e) {
-    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
-    const range = document.createRange();
-    range.selectNodeContents(article);
-    const sel = getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
-  }
+document.getElementById("copy").addEventListener("click", () => {
+  // 用「選取整篇再複製」，跟滑鼠選取按 Ctrl+C 完全一樣。不要改回 navigator.clipboard.write：
+  // 2026-11-23 第 10 章實測，那樣寫進剪貼簿的 HTML 貼到方格子後，清單裡的三個連結都不見了，
+  // 內文段落裡的連結卻還在；同一頁用滑鼠選取複製，連結全都在。
+  const range = document.createRange();
+  range.selectNodeContents(article);
+  const sel = getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
 });
 </script>
 </body>
