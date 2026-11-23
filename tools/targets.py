@@ -33,8 +33,17 @@
 
 內文提到其他章節時寫成 `[第 05 章](../05-lists/)`（2026-11-23 weijie 校稿第 07 章要求）。
 GitHub 直接解得到；產生器依「讀者在哪裡」改寫：網頁版連網頁版、Colab 連 Colab。
-方格子是手動貼的，貼的時候換成 chapters.json 的 `vocus` 網址，由 check_vocus.py 核對。
+方格子是手動貼的：build_vocus.py 產生 `vocus/*.html`，章節連結已換成 chapters.json 的 `vocus` 網址，
+weijie 從那一頁複製貼上，貼完再由 check_vocus.py 核對（2026-11-23 起，原本是從 VS Code 預覽複製、
+手動換網址，常漏）。
+
+## 方格子（`vocus`）
+
+讀者不在網頁版也不在 Colab，`only:` 段落只要有 `github` 就保留（兩個導流連結都放），
+不含 `github` 的（例如 `only:web`）拿掉。
 """
+import json
+from pathlib import Path
 import re
 
 REPO = "wjweng/python-notes"
@@ -60,6 +69,8 @@ def filter_blocks(md: str, target: str) -> str:
         unknown = targets - {"github", "web", "colab"}
         if unknown:
             raise ValueError(f"only: 標記寫了不存在的目標 {unknown}")
+        if target == "vocus":
+            return m.group(2) if "github" in targets else ""
         return m.group(2) if target in targets else ""
     return BLOCK.sub(keep, md)
 
@@ -72,7 +83,20 @@ def chapter_links(md: str, target: str) -> str:
         return CHAPTER_LINK.sub(lambda m: f"]({PAGES}/{m.group(1)}.html)", md)
     if target == "colab":
         return CHAPTER_LINK.sub(lambda m: f"]({COLAB}/{m.group(1)}.ipynb)", md)
+    if target == "vocus":
+        return CHAPTER_LINK.sub(lambda m: f"]({vocus_url(m.group(1))})", md)
     raise ValueError(f"不存在的目標 {target}")
+
+
+def vocus_url(chapter_dir: str) -> str:
+    """chapters.json 的 `vocus` 網址。還沒發的章節沒有網址，直接報錯：寧可擋下來，也不要讓讀者點到錯的地方。"""
+    chapters = json.loads((Path(__file__).resolve().parent.parent / "chapters.json")
+                          .read_text(encoding="utf-8"))["chapters"]
+    ch = next((c for c in chapters if c["dir"] == chapter_dir), None)
+    if not ch or not ch.get("vocus"):
+        raise ValueError(f"chapters.json 的 {chapter_dir} 沒有 vocus 網址，"
+                         "先把該章發到方格子並補上網址")
+    return ch["vocus"]
 
 
 def absolute_links(md: str, chapter_dir: str, image_base: str) -> str:

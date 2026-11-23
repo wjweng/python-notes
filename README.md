@@ -37,9 +37,10 @@ python3 tools/build_flowchart.py  # figures/flowcharts.json → 流程圖 PNG
 python3 tools/build_memory.py     # figures/memory.json → 記憶體示意圖 PNG（變數 → 串列的箭頭圖）
 python3 tools/build_notebook.py   # Colab notebook
 python3 tools/build_web.py        # Pyodide 互動頁
+python3 tools/build_vocus.py      # 方格子專用版（連結已換成方格子網址，從這一頁複製貼上）
 ```
 
-`notebooks/` 與 `web/` 底下的檔案不要手動編輯，重跑腳本會覆蓋。
+`notebooks/`、`web/`、`vocus/` 底下的檔案不要手動編輯，重跑腳本會覆蓋。
 
 產生之後的兩道檢查：
 

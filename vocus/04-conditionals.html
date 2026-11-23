@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>方格子版 04｜if 流程控制</title>
+<style>
+  :root { --bg: #ffffff; --text: #1f2328; --dim: #59636e; --line: #d1d9e0; --note: #fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 24px 16px 80px;
+          font-family: system-ui, sans-serif; line-height: 1.8; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .tool { position: sticky; top: 0; z-index: 5; background: var(--note); border: 1px solid #d4a72c;
+           border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+  .tool b { font-size: 15px; }
+  .tool button { font: inherit; font-weight: 700; padding: 6px 16px; margin-right: 10px;
+                  border-radius: 6px; border: 1px solid #1f2328; background: #1f2328; color: #fff;
+                  cursor: pointer; }
+  .tool .msg { color: #1a7f37; font-weight: 700; }
+  .tool ol { margin: 8px 0 0; padding-left: 22px; }
+  .tool code { font-size: 13px; }
+  pre { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+         overflow-x: auto; }
+  code { font-family: ui-monospace, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid var(--line); padding: 6px 12px; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tool">
+    <b>第 04 章　if 流程控制</b>（方格子專用版，產生於 commit 當下的原稿）<br>
+    <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
+    <ol>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61ae3a00fd8978000109f663">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填</li>
+      <li>這一章有圖：圖片要在方格子另外上傳，並填圖說</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py 04 &lt;文章網址&gt;</code></li>
+    </ol>
+  </div>
+  <article id="article">
+<p>當我們的程式需要根據某些狀況做出判斷，例如某些條件成立的話，程式就對應做出某種行為，這時單純從頭執行到尾的程式便無法滿足我們的需求，因此便需引進流程控制的概念，也就是 if 敘述以及其相關的語法，來讓程式可以完成更複雜的工作。</p>
+<h2>if 敘述</h2>
+<p>最基本 if 敘述語法如下，如果滿足 condition1 的條件判斷，則執行 A 程式碼區塊，否則就結束判斷。</p>
+<pre class="static"><code>if condition1:
+    Do A</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/04-conditionals/figures/04-fig1-if.png" alt="condition1 成立走 Yes 去執行 Do A，不成立走 No 直接結束" title="點一下放大" loading="lazy"></p>
+<p>例如以下的程式，<code>is_raining</code> 是 <code>True</code>，所以會印出提醒帶傘的訊息：</p>
+<pre class="static"><code class="lang-python">is_raining = True
+if is_raining:
+    print(&quot;Take an umbrella.&quot;)
+print(&quot;Go out.&quot;)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>Take an umbrella.
+Go out.</code></pre>
+<h3>縮排與冒號</h3>
+<p>上面的例子裡，<code>print(&quot;Take an umbrella.&quot;)</code> 前面空了 4 格，<code>print(&quot;Go out.&quot;)</code> 則沒有，這個差別是有意義的。Python 用縮排來決定哪幾行屬於 if 的程式碼區塊：縮排的那幾行只在條件成立時才執行，沒有縮排的 <code>print(&quot;Go out.&quot;)</code> 已經在 if 之外，不論條件是否成立都會執行。把 <code>is_raining</code> 改成 <code>False</code>，就只會印出「Go out.」。</p>
+<p>縮排在 Python 是語法的一部分，習慣上用 4 個半形空白，同一個區塊裡的每一行縮排要一致。if 的那一行最後的冒號 <code>:</code> 也不能省略，它代表接下來是一個程式碼區塊。</p>
+<p>如果忘了縮排：</p>
+<pre class="static"><code class="lang-python">is_raining = True
+if is_raining:
+print(&quot;Take an umbrella.&quot;)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndentationError: expected an indented block after &#x27;if&#x27; statement on line 2</code></pre>
+<p>如果忘了冒號：</p>
+<pre class="static"><code class="lang-python">is_raining = True
+if is_raining
+    print(&quot;Take an umbrella.&quot;)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>SyntaxError: expected &#x27;:&#x27;</code></pre>
+<h2>if / else 敘述</h2>
+<p>進一步，如果滿足 condition1 的條件判斷時執行 A 程式碼區塊，不滿足時要執行 B 程式碼區塊，則可以用 if / else 敘述。</p>
+<pre class="static"><code>if condition1:
+    Do A
+else:
+    Do B</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/04-conditionals/figures/04-fig2-if-else.png" alt="condition1 成立執行 Do A，不成立執行 Do B，兩條路最後會合" title="點一下放大" loading="lazy"></p>
+<h2>巢狀 if 敘述</h2>
+<p>若 if 敘述裡面包含有其它的 if 敘述，稱為巢狀 if 敘述。</p>
+<pre class="static"><code>if condition1:
+    if condition2:
+        Do A
+    else:
+        Do B
+else:
+    Do C</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/04-conditionals/figures/04-fig3-nested-if.png" alt="condition1 成立之後才會再判斷 condition2，決定執行 Do A 或 Do B" title="點一下放大" loading="lazy"></p>
+<h2>if / elif / else 敘述</h2>
+<p>當程式有多個條件要做判斷時，可使用 if / elif / else 敘述。</p>
+<pre class="static"><code>if condition1:
+    Do A
+elif condition2:
+    Do B
+......
+else:
+    Do C</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/04-conditionals/figures/04-fig4-if-elif-else.png" alt="condition1 不成立才會判斷 condition2，兩個都不成立才執行 Do C" title="點一下放大" loading="lazy"></p>
+<p>例如，當我們要設計一個 BMI（Body Mass Index）的計算程式時，必須判斷[1]：</p>
+<ul><li>若 BMI 小於 18.5 時，體重過輕。</li><li>若 BMI 大於或等於 18.5、且 BMI 小於 24 時，體重正常。</li><li>若 BMI 大於或等於 24、且 BMI 小於 27 時，體重過重。</li><li>若 BMI 大於或等於 27 時，則達到肥胖的程度。</li></ul>
+<p>此時除了必須運用 if / elif / else 語法外，還需要能比較大小的關係運算子；條件裡的「且」，則可以用邏輯運算子來表示。</p>
+<h2>關係運算子</h2>
+<ul><li><code>a &gt; b</code>：檢查 a 是否大於 b</li><li><code>a &gt;= b</code>：檢查 a 是否大於或等於 b</li><li><code>a &lt; b</code>：檢查 a 是否小於 b</li><li><code>a &lt;= b</code>：檢查 a 是否小於或等於 b</li><li><code>a == b</code>：檢查 a 是否等於 b</li><li><code>a != b</code>：檢查 a 是否不等於 b</li></ul>
+<p>舉例來說：</p>
+<pre class="static"><code class="lang-python"># a &gt; b
+print(2 &gt; 1)
+print(1 &gt; 2)</code></pre>
+<pre class="static"><code class="lang-python"># a &gt;= b
+print(2 &gt;= 2)
+print(1 &gt;= 2)</code></pre>
+<pre class="static"><code class="lang-python"># a &lt; b
+print(1 &lt; 2)
+print(2 &lt; 1)</code></pre>
+<pre class="static"><code class="lang-python"># a &lt;= b
+print(2 &lt;= 2)
+print(2 &lt;= 1)</code></pre>
+<pre class="static"><code class="lang-python"># a == b
+print(2 == 2)
+print(2 == 1)</code></pre>
+<pre class="static"><code class="lang-python"># a != b
+print(2 != 1)
+print(2 != 2)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>True
+False
+True
+False
+True
+False
+True
+False
+True
+False
+True
+False</code></pre>
+<h3><code>==</code> 和 <code>=</code> 不一樣</h3>
+<p>要注意檢查是否「相等」用的是兩個等號 <code>==</code>，一個等號 <code>=</code> 是把值指派給變數。在 if 的條件裡寫成一個等號，會產生錯誤：</p>
+<pre class="static"><code class="lang-python">x = 1
+if x = 1:
+    print(&quot;x is 1&quot;)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>SyntaxError: invalid syntax. Maybe you meant &#x27;==&#x27; or &#x27;:=&#x27; instead of &#x27;=&#x27;?</code></pre>
+<p>Python 會提示我們是否想寫的是 <code>==</code> 而不是 <code>=</code>。</p>
+<h2>邏輯運算子</h2>
+<ul><li><code>and</code> 運算子，例如：<code>condition1 and condition2</code>，兩條件必須同時成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>or</code> 運算子，例如：<code>condition1 or condition2</code>，兩條件至少有一個成立為 <code>True</code>，反之為 <code>False</code>。</li><li><code>not</code> 運算子，例如：<code>not condition1</code>，此條件不成立為 <code>True</code>，反之為 <code>False</code>。</li></ul>
+<p>舉例來說：</p>
+<pre class="static"><code class="lang-python"># and
+print((1 &lt; 2) and (2 &lt; 3))
+print((1 &lt; 2) and (3 &lt; 2))</code></pre>
+<pre class="static"><code class="lang-python"># or
+print((1 &lt; 2) or (3 &lt; 2))
+print((2 &lt; 1) or (3 &lt; 2))</code></pre>
+<pre class="static"><code class="lang-python"># not
+print(not (1 &gt; 2))
+print(not (1 &lt; 2))</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>True
+False
+True
+False
+True
+False</code></pre>
+<h3>連鎖比較</h3>
+<p>前面 BMI 正常範圍的條件「大於或等於 18.5、且小於 24」，用 <code>and</code> 可以寫成 <code>bmi &gt;= 18.5 and bmi &lt; 24</code>。Python 也允許把兩個比較直接串在一起，寫成跟數學一樣的 <code>18.5 &lt;= bmi &lt; 24</code>，兩種寫法的結果相同：</p>
+<pre class="static"><code class="lang-python">bmi = 23.1
+print(bmi &gt;= 18.5 and bmi &lt; 24)
+print(18.5 &lt;= bmi &lt; 24)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>True
+True</code></pre>
+<h2>實作 BMI 計算機</h2>
+<p>綜合以上所學，這個程式會要求使用者輸入身高和體重，接著計算 BMI，然後印出它所計算的數值並判斷體重是否在正常範圍內。</p>
+<pre class="static"><code class="lang-python"># input your height and weight
+height = float(input(&quot;Please input your height in centimeter:\n&quot;))
+weight = float(input(&quot;Please input your weight in kilogram:\n&quot;))
+
+# calculate BMI
+bmi = weight / ((height / 100) ** 2)
+
+# BMI interpretation
+if bmi &lt; 18.5:
+    print(f&quot;Your BMI is {bmi}, and you are underweight.&quot;)
+elif bmi &lt; 24:
+    print(f&quot;Your BMI is {bmi}, and you have a normal weight.&quot;)
+elif bmi &lt; 27:
+    print(f&quot;Your BMI is {bmi}, and you are overweight.&quot;)
+else:
+    print(f&quot;Your BMI is {bmi}, and you are obese.&quot;)</code></pre>
+<p>以下是執行結果：</p>
+<pre class="static"><code>Please input your height in centimeter:
+180
+Please input your weight in kilogram:
+75
+Your BMI is 23.148148148148145, and you have a normal weight.</code></pre>
+<p>身高和體重用 <code>float()</code> 轉換，是因為使用者可能輸入「175.5」這種帶小數點的數字，用 <code>int()</code> 轉換會產生 <code>ValueError</code>。</p>
+<p>注意程式裡第二個條件只寫了 <code>bmi &lt; 24</code>，沒有寫 <code>bmi &gt;= 18.5</code>。這是因為 if / elif / else 會由上往下逐一判斷，遇到第一個成立的條件，就執行它底下的區塊，其餘的條件都會跳過不再判斷。能走到 <code>elif bmi &lt; 24</code> 這一行，代表前面的 <code>bmi &lt; 18.5</code> 已經不成立，也就是 BMI 一定大於或等於 18.5，所以下限不必再寫一次。也因為如此，條件的先後順序會影響結果，把範圍由小到大依序排好，程式才會判斷正確。</p>
+<hr>
+<p>這一章我們學會了用 if、if / else、巢狀 if 與 if / elif / else 讓程式依條件走不同的路，也認識了關係運算子與邏輯運算子。Python 用縮排決定哪些程式碼屬於同一個區塊，遇到 <code>IndentationError</code> 或 <code>SyntaxError</code> 時，可以先檢查縮排、冒號，以及比較時是不是少寫了一個等號。</p>
+<h2>本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/04-conditionals/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/04-conditionals.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li><li><a href="https://wjweng.github.io/python-notes/web/04-conditionals.html">在瀏覽器直接執行</a> — 不用登入，開啟就能改程式碼看結果</li></ul>
+<h2>參考資料</h2>
+<p>[1] <a href="https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=542&amp;pid=9737">成人健康體位標準</a></p>
+  </article>
+</div>
+<script>
+const article = document.getElementById("article");
+const msg = document.getElementById("msg");
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
+      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
+    })]);
+    msg.textContent = "已複製 ✓";
+  } catch (e) {
+    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
+    const range = document.createRange();
+    range.selectNodeContents(article);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>方格子版 08｜random 模組：種子與狀態</title>
+<style>
+  :root { --bg: #ffffff; --text: #1f2328; --dim: #59636e; --line: #d1d9e0; --note: #fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 24px 16px 80px;
+          font-family: system-ui, sans-serif; line-height: 1.8; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .tool { position: sticky; top: 0; z-index: 5; background: var(--note); border: 1px solid #d4a72c;
+           border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+  .tool b { font-size: 15px; }
+  .tool button { font: inherit; font-weight: 700; padding: 6px 16px; margin-right: 10px;
+                  border-radius: 6px; border: 1px solid #1f2328; background: #1f2328; color: #fff;
+                  cursor: pointer; }
+  .tool .msg { color: #1a7f37; font-weight: 700; }
+  .tool ol { margin: 8px 0 0; padding-left: 22px; }
+  .tool code { font-size: 13px; }
+  pre { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+         overflow-x: auto; }
+  code { font-family: ui-monospace, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid var(--line); padding: 6px 12px; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tool">
+    <b>第 08 章　random 模組：種子與狀態</b>（方格子專用版，產生於 commit 當下的原稿）<br>
+    <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
+    <ol>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61b80be7fd897800012d5ad8">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py 08 &lt;文章網址&gt;</code></li>
+    </ol>
+  </div>
+  <article id="article">
+<p>透過 random 模組生成的隨機數並非是真正完全隨機的，而是由一套固定的演算法計算出來的（Python 使用的是梅森旋轉演算法，Mersenne Twister），因此這個特徵也被稱為是偽隨機（pseudo-random）。也因為是計算出來的，隨機數是可以被重現的，而重現隨機數的方式便是透過設定相同的種子（seed），或是設定隨機數生成器的狀態（state）來達成。</p>
+<h2>設定種子</h2>
+<p>設定隨機數生成器種子的方式如下：</p>
+<pre class="static"><code>random.seed([a])</code></pre>
+<ul><li>當 <code>a</code> 被省略時，每次調用 random 模組的方法生成的數就會是隨機的。</li><li>當 <code>a</code> 被設定後，每次使用 <code>random.seed(a)</code> 後調用 random 模組的方法生成的數列就會是同一串。</li></ul>
+<p><code>a</code> 除了整數，也可以是字串等型別。從 Python 3.11 開始，<code>a</code> 只能是 <code>None</code>、整數、浮點數、字串、<code>bytes</code> 或 <code>bytearray</code> 其中一種，例如以下用字串「weijie」當種子：</p>
+<pre class="static"><code class="lang-python">import random
+
+random.seed(&quot;weijie&quot;)
+print(random.randint(1, 10))</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>8</code></pre>
+<p>以下範例展示利用設定相同的種子，在每個 for 迴圈中都產生同樣的亂數：</p>
+<pre class="static"><code class="lang-python">import random
+
+for i in range(5):
+    random.seed(1)
+    rand_int = random.randint(1, 10)
+    print(f&quot;loop {i}: {rand_int}&quot;)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>loop 0: 3
+loop 1: 3
+loop 2: 3
+loop 3: 3
+loop 4: 3</code></pre>
+<h3>在程式開頭設定一次種子</h3>
+<p>上面的範例每一輪都重新設定一次種子，所以每一輪都拿到同一個數字。一般的用法則是在程式開頭設定一次種子，之後產生的一整串隨機數就會固定下來。以下設定兩次相同的種子，各自連續產生 5 個隨機整數：</p>
+<pre class="static"><code class="lang-python">import random
+
+random.seed(1)
+for _ in range(5):
+    print(random.randint(1, 10), end=&quot; &quot;)
+print()
+
+random.seed(1)
+for _ in range(5):
+    print(random.randint(1, 10), end=&quot; &quot;)
+print()</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>3 10 2 5 2
+3 10 2 5 2</code></pre>
+<p>這裡的迴圈只是用來重複執行 5 次，迴圈變數用不到，因此取名為底線 <code>_</code>。如同<a href="https://vocus.cc/article/61adbd7efd897800011372d7">第 02 章</a>的命名規則，<code>_</code> 本身就是一個合法的變數名稱，它跟一般的變數一樣會被指定值，只是習慣上用這個名字告訴讀程式的人：這個值不會被使用。</p>
+<p>同一串裡的 5 個數字各不相同，看起來一樣是隨機的，但只要種子相同，整串數字就會完全一樣，重新執行整支程式也一樣。</p>
+<p><a href="https://vocus.cc/article/61b7145dfd897800012b8b09">第 07 章</a>提到每次執行的結果都會不同，那是因為沒有設定種子。固定種子在除錯或測試時很有用，程式的結果跟預期不一樣時，固定種子就能讓每次執行都重現同一個情況，方便找出問題；把程式分享給別人時，對方設定同樣的種子，也能得到跟我們一樣的結果。</p>
+<h3>換了 Python 版本，結果可能不同</h3>
+<p>不過要注意，根據 Python 官方文件，random 模組大部分的演算法與設定種子的方式，都可能隨著 Python 的版本改變，只有 <code>random()</code> 函數產生的數列保證不變。因此同一個種子在不同版本的 Python 上，<code>randint()</code> 等函數的結果可能會不一樣。本章的執行結果是用 Python 3.13 跑出來的，也在 Python 3.12 實測過，結果相同；如果用其他版本跑出來的數字跟文章不同，並不是程式寫錯了。</p>
+<h2>儲存與還原狀態</h2>
+<p>我們也可以在調用 random 模組前，先用 <code>random.getstate()</code> 把隨機數生成器目前的狀態存起來：</p>
+<pre class="static"><code>rand_state = random.getstate()</code></pre>
+<p>並在下次調用 random 模組前設定相同的狀態，便可以得到相同的隨機結果：</p>
+<pre class="static"><code>random.setstate(rand_state)</code></pre>
+<p>以下範例是 <code>random.getstate()</code> 與 <code>random.setstate()</code> 的用法，先存下目前的狀態，接著產生兩個隨機整數，再還原狀態後產生第三個隨機整數：</p>
+<pre class="static"><code class="lang-python">import random
+
+rand_state = random.getstate()
+
+rand_int = random.randint(1, 10)
+print(f&quot;Generate a random integer: {rand_int}&quot;)
+
+rand_int = random.randint(1, 10)
+print(f&quot;Generate another random integer: {rand_int}&quot;)
+
+random.setstate(rand_state)
+rand_int = random.randint(1, 10)
+print(f&quot;Generate a random integer after restoring state: {rand_int}&quot;)</code></pre>
+<p>輸出結果每個人會不同，但第一行和第三行的數字一定相同，因為第三個數字是從還原後的同一個狀態產生的：</p>
+<pre class="static"><code>Generate a random integer: 2
+Generate another random integer: 7
+Generate a random integer after restoring state: 2</code></pre>
+<hr>
+<p>這一章我們學會了用 <code>random.seed()</code> 設定種子，讓隨機的結果可以重現，以及用 <code>random.getstate()</code> 與 <code>random.setstate()</code> 儲存與還原隨機數生成器的狀態。隨機的結果跟預期不一樣、想重現同一個情況時，可以先在程式開頭固定種子；跑出來的數字跟別人不同時，則可以確認雙方的種子與 Python 版本是否相同。</p>
+<h2>本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/08-random-seed/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/08-random-seed.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li><li><a href="https://wjweng.github.io/python-notes/web/08-random-seed.html">在瀏覽器直接執行</a> — 不用登入，開啟就能改程式碼看結果</li></ul>
+  </article>
+</div>
+<script>
+const article = document.getElementById("article");
+const msg = document.getElementById("msg");
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
+      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
+    })]);
+    msg.textContent = "已複製 ✓";
+  } catch (e) {
+    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
+    const range = document.createRange();
+    range.selectNodeContents(article);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
+  }
+});
+</script>
+</body>
+</html>

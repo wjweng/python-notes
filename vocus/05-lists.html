@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>方格子版 05｜串列（list）</title>
+<style>
+  :root { --bg: #ffffff; --text: #1f2328; --dim: #59636e; --line: #d1d9e0; --note: #fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 24px 16px 80px;
+          font-family: system-ui, sans-serif; line-height: 1.8; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .tool { position: sticky; top: 0; z-index: 5; background: var(--note); border: 1px solid #d4a72c;
+           border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+  .tool b { font-size: 15px; }
+  .tool button { font: inherit; font-weight: 700; padding: 6px 16px; margin-right: 10px;
+                  border-radius: 6px; border: 1px solid #1f2328; background: #1f2328; color: #fff;
+                  cursor: pointer; }
+  .tool .msg { color: #1a7f37; font-weight: 700; }
+  .tool ol { margin: 8px 0 0; padding-left: 22px; }
+  .tool code { font-size: 13px; }
+  pre { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+         overflow-x: auto; }
+  code { font-family: ui-monospace, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid var(--line); padding: 6px 12px; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tool">
+    <b>第 05 章　串列（list）</b>（方格子專用版，產生於 commit 當下的原稿）<br>
+    <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
+    <ol>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61b06c3efd89780001f3adea">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填</li>
+      <li>這一章有圖：圖片要在方格子另外上傳，並填圖說</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py 05 &lt;文章網址&gt;</code></li>
+    </ol>
+  </div>
+  <article id="article">
+<p>前面提到變數為程式儲存資料的地方，一個變數可以儲存一個學生的成績、一個人的身高、或是一個人名等，但如果多人的資料要管理，為每個人設計一個變數顯然就有點不切實際，串列就是用來解決這樣的問題。</p>
+<h2>串列</h2>
+<p>Python 的串列可以包含相同型別的元素，例如記錄一個國家的城市，也可以包含不同型別的元素，例如記錄一個人的姓名、身高、體重等個人資料。</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city)</code></pre>
+<pre class="static"><code class="lang-python">student = [&quot;小明&quot;, 140, 45]
+print(student)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;小明&#x27;, 140, 45]</code></pre>
+<h2>讀取串列元素</h2>
+<p>我們可以利用串列的索引值（index）來讀取串列的內容，Python 的串列索引是標記相對於第一個元素的位置，因此第一個元素的索引值為 0、第二個元素的索引值為 1，以此類推。此外，若索引值是 -1，代表的是串列的最後一個元素、若索引值是 -2，代表的是串列的倒數第二個元素，以此類推。</p>
+<pre class="static"><code class="lang-python">student = [&quot;小明&quot;, 140, 45]
+print(student[0])
+print(student[1])
+print(student[2])
+print(student[-1])
+print(student[-2])
+print(student[-3])</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>小明
+140
+45
+45
+140
+小明</code></pre>
+<p><code>student</code> 只有 3 個元素，索引值的範圍是 0 到 2（或 -1 到 -3），若讀取超出這個範圍的索引值，程式會產生錯誤：</p>
+<pre class="static"><code class="lang-python">student = [&quot;小明&quot;, 140, 45]
+print(student[3])</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndexError: list index out of range</code></pre>
+<p>若要同時取得串列中的多個元素，可用串列切片（slice）的方式：</p>
+<ul><li><code>list[a:b]</code>：取得串列索引值為 <code>a</code> 到 <code>b - 1</code> 的元素</li><li><code>list[:a]</code>：取得串列前 a 個元素</li><li><code>list[a:]</code>：取得串列索引值為 <code>a</code> 到最後一個元素</li><li><code>list[a:b:c]</code>：以 <code>c</code> 為間隔取得串列索引值為 <code>a</code> 到 <code>b - 1</code> 的元素</li><li><code>list[:]</code>：取得串列所有元素</li></ul>
+<p>例如：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city[2:5])
+print(city[:2])
+print(city[2:])
+print(city[1:5:2])
+print(city[:])</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;]
+[&#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]
+[&#x27;桃園&#x27;, &#x27;台中&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;]</code></pre>
+<p>和讀取單一元素不同，切片的範圍超出串列長度時不會產生錯誤，超出的部分會直接被忽略：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city[3:10])</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台中&#x27;, &#x27;台南&#x27;]</code></pre>
+<h2>串列的長度與檢查元素</h2>
+<p>既然讀取超出範圍的索引值會產生錯誤，在讀取之前知道串列有多少個元素就很重要了。<code>len()</code> 函數可以取得串列的長度，也就是元素的個數，因此最後一個元素的索引值就是 <code>len(city) - 1</code>。若只是想知道某個值在不在串列裡，則可以用 <code>in</code> 運算子，在串列裡就得到 <code>True</code>，反之為 <code>False</code>；<code>not in</code> 則剛好相反。</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(len(city))
+print(city[len(city) - 1])</code></pre>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(&quot;新竹&quot; in city)
+print(&quot;高雄&quot; in city)
+print(&quot;高雄&quot; not in city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>5
+台南
+True
+False
+True</code></pre>
+<h2>修改串列元素</h2>
+<p>串列可指定索引值修改其內容：</p>
+<pre class="static"><code class="lang-python">student = [&quot;小明&quot;, 140, 45]
+student[2] = 50
+print(student)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;小明&#x27;, 140, 50]</code></pre>
+<h2>增加串列元素</h2>
+<p>當需要在串列後方增加串列元素時，若使用超出串列長度的索引值來修改串列的內容，程式會產生錯誤。</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city[5] = &quot;宜蘭&quot;</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>IndexError: list assignment index out of range</code></pre>
+<p>有幾種方法可以達成這個目標：</p>
+<ul><li>串列可和另一串列相加。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city = city + [&quot;宜蘭&quot;]
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;宜蘭&#x27;]</code></pre>
+<ul><li>使用 <code>append()</code> 方法，將新的元素或串列加到串列的尾端。若為串列，則加入後會以串列的形式存在，也就是串列中有元素是串列。要讀取這個串列裡的元素，可以連續使用兩次索引值，例如 <code>city[5][0]</code> 是先取出索引值為 5 的串列，再取出它索引值為 0 的元素。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.append([&quot;花蓮&quot;, &quot;台東&quot;])
+print(city)
+print(city[5])
+print(city[5][0])</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, [&#x27;花蓮&#x27;, &#x27;台東&#x27;]]
+[&#x27;花蓮&#x27;, &#x27;台東&#x27;]
+花蓮</code></pre>
+<ul><li>使用 <code>extend()</code> 方法，將新的串列加到串列的尾端。和 <code>append()</code> 不同的是，串列會拆解為元素一一加入串列的尾端。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.extend([&quot;澎湖&quot;, &quot;金門&quot;])
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;澎湖&#x27;, &#x27;金門&#x27;]</code></pre>
+<p><code>extend()</code> 會把傳進去的東西一個一個拆開再加入，字串也會被拆成一個一個字。因此若要加入的是一個字串，應該用 <code>append()</code>，或是把字串放進串列裡再用 <code>extend()</code>：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.extend(&quot;宜蘭&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;宜&#x27;, &#x27;蘭&#x27;]</code></pre>
+<ul><li>使用 <code>insert()</code> 方法，將新的元素或串列插入指定的位置。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.insert(4, &quot;嘉義&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;, &#x27;嘉義&#x27;, &#x27;台南&#x27;]</code></pre>
+<h3>直接修改原本串列的方法</h3>
+<p>注意串列相加的寫法需要 <code>city = city + [&quot;宜蘭&quot;]</code>，把相加後產生的新串列指派回 <code>city</code>；而 <code>append()</code>、<code>extend()</code>、<code>insert()</code> 是直接修改原本的串列，它們的回傳值是 <code>None</code>。如果照著相加的習慣寫成 <code>city = city.append(&quot;宜蘭&quot;)</code>，<code>city</code> 就會被換成 <code>None</code>，原本的串列也就找不回來了：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city = city.append(&quot;宜蘭&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>None</code></pre>
+<h2>刪除串列元素</h2>
+<ul><li>使用 <code>del</code> 將串列中指定的元素刪除。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+del city[4]
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<ul><li>使用 <code>pop()</code> 將串列中指定的元素刪除，並回傳刪除的元素；若沒有指定，則會刪除串列中最後一個元素。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(city.pop())
+print(city)
+print(city.pop(1))
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>台南
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]
+桃園
+[&#x27;台北&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<ul><li>使用 <code>remove()</code> 將串列中第一個等於指定元素的值刪除。</li></ul>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.remove(&quot;台中&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台南&#x27;]</code></pre>
+<p>若串列裡找不到指定的值，<code>remove()</code> 會產生錯誤，可以先用 <code>in</code> 檢查這個值在不在串列裡再刪除：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+city.remove(&quot;高雄&quot;)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ValueError: list.remove(x): x not in list</code></pre>
+<h2>複製串列</h2>
+<p>前面增加與刪除元素的方法，都是直接修改原本的串列，因此把串列指派給另一個變數時要特別注意：<code>my_city = city</code> 並不會複製出一個新的串列，而是讓兩個變數指向同一個串列，所以透過 <code>my_city</code> 加入元素，<code>city</code> 也會跟著改變。</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;]
+my_city = city
+my_city.append(&quot;台中&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<p>若要得到一個可以獨立修改的串列，可以用前面切片提到的 <code>city[:]</code>，它取得串列所有元素後會產生一個新的串列；也可以寫成 <code>city.copy()</code>，效果相同。</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;]
+my_city = city[:]
+my_city.append(&quot;台中&quot;)
+print(city)
+print(my_city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;新竹&#x27;, &#x27;台中&#x27;]</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/05-lists/figures/05-fig1-alias-vs-copy.png" alt="上半：city 和 my_city 的箭頭指向同一個串列，「台中」加進去後兩個變數都看得到；下半：用切片複製產生了第二個串列，「台中」只加在 my_city 指向的那一個" title="點一下放大" loading="lazy"></p>
+<p>不過這樣的複製只有外層，若串列裡還有串列，裡面的串列仍然是同一個，修改它一樣會影響原本的串列：</p>
+<pre class="static"><code class="lang-python">city = [&quot;台北&quot;, [&quot;花蓮&quot;, &quot;台東&quot;]]
+my_city = city[:]
+my_city[1].append(&quot;屏東&quot;)
+print(city)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>[&#x27;台北&#x27;, [&#x27;花蓮&#x27;, &#x27;台東&#x27;, &#x27;屏東&#x27;]]</code></pre>
+<p><img src="https://raw.githubusercontent.com/wjweng/python-notes/main/chapters/05-lists/figures/05-fig2-shallow-copy.png" alt="city 和 my_city 指向兩個不同的外層串列，但兩者的第二格都指向同一個內層串列，所以「屏東」兩邊都看得到" title="點一下放大" loading="lazy"></p>
+<hr>
+<p>這一章我們學會了建立串列、用索引值與切片讀取元素，以及增加、修改、刪除與複製串列元素的方法。遇到 <code>IndexError</code> 時，可以先用 <code>len()</code> 確認串列的長度，看看索引值是不是超出了範圍；串列的內容跟預期的不一樣時，則可以檢查是不是有兩個變數指向同一個串列。</p>
+<h2>本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/05-lists/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/05-lists.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li><li><a href="https://wjweng.github.io/python-notes/web/05-lists.html">在瀏覽器直接執行</a> — 不用登入，開啟就能改程式碼看結果</li></ul>
+  </article>
+</div>
+<script>
+const article = document.getElementById("article");
+const msg = document.getElementById("msg");
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
+      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
+    })]);
+    msg.textContent = "已複製 ✓";
+  } catch (e) {
+    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
+    const range = document.createRange();
+    range.selectNodeContents(article);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
+  }
+});
+</script>
+</body>
+</html>

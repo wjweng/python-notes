@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>方格子版 07｜random 模組</title>
+<style>
+  :root { --bg: #ffffff; --text: #1f2328; --dim: #59636e; --line: #d1d9e0; --note: #fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 24px 16px 80px;
+          font-family: system-ui, sans-serif; line-height: 1.8; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .tool { position: sticky; top: 0; z-index: 5; background: var(--note); border: 1px solid #d4a72c;
+           border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+  .tool b { font-size: 15px; }
+  .tool button { font: inherit; font-weight: 700; padding: 6px 16px; margin-right: 10px;
+                  border-radius: 6px; border: 1px solid #1f2328; background: #1f2328; color: #fff;
+                  cursor: pointer; }
+  .tool .msg { color: #1a7f37; font-weight: 700; }
+  .tool ol { margin: 8px 0 0; padding-left: 22px; }
+  .tool code { font-size: 13px; }
+  pre { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+         overflow-x: auto; }
+  code { font-family: ui-monospace, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid var(--line); padding: 6px 12px; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tool">
+    <b>第 07 章　random 模組</b>（方格子專用版，產生於 commit 當下的原稿）<br>
+    <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
+    <ol>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61b7145dfd897800012b8b09">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py 07 &lt;文章網址&gt;</code></li>
+    </ol>
+  </div>
+  <article id="article">
+<p>當我們需要在程式中模擬或實作一些隨機發生的事件，例如模擬猜拳、丟骰子的結果，便需要程式可以根據開發者輸入的數值範圍、型態等，隨機產生一個結果，而 Python 的 random 模組便是用於實現這個功能。</p>
+<h2>匯入 random 模組</h2>
+<p>使用 <code>import</code> 匯入 random 模組。</p>
+<pre class="static"><code class="lang-python">import random</code></pre>
+<p>匯入之後，就可以用「模組名稱.函數名稱」的方式呼叫模組裡的函數，例如 <code>random.randint()</code>，中間的 <code>.</code> 代表這個函數屬於 random 模組。模組的完整觀念會在後面的章節介紹，這一章只要記得使用前先匯入、呼叫時加上 <code>random.</code> 就可以了。</p>
+<h3>忘了匯入模組</h3>
+<p>如果忘了寫 <code>import random</code> 就直接呼叫，例如：</p>
+<pre class="static"><code>print(random.randint(1, 9))</code></pre>
+<p>錯誤訊息的最後一行如下，Python 也會提示我們是不是忘了匯入：</p>
+<pre class="static"><code>NameError: name &#x27;random&#x27; is not defined. Did you forget to import &#x27;random&#x27;?</code></pre>
+<h3>檔案不要取名為 <code>random.py</code></h3>
+<p>如果把自己的程式存成 <code>random.py</code>，<code>import random</code> 匯入的會是這個檔案本身，而不是 Python 內建的 random 模組，因此呼叫 <code>random.randint()</code> 時就會找不到這個函數。例如以下的程式存成 <code>random.py</code> 並執行：</p>
+<pre class="static"><code>import random
+print(random.randint(1, 9))</code></pre>
+<p>錯誤訊息的最後一行很長，開頭如下：</p>
+<pre class="static"><code>AttributeError: module &#x27;random&#x27; has no attribute &#x27;randint&#x27;</code></pre>
+<p>這一行的後面，Python 會接著提示這個檔案和內建的 random 模組同名，建議我們把檔案改名（consider renaming）。遇到這個錯誤時，把檔案改成其他名字，例如本章範例使用的 <code>01_random_int.py</code> 就可以了。</p>
+<h2>產生隨機整數</h2>
+<p>以下幾個方法可以產生指定區間的隨機整數：</p>
+<pre class="static"><code>random.randrange([start, ]stop[, step])</code></pre>
+<ul><li><code>start</code>：指定區間的起始值，若沒有輸入則預設為 0。</li><li><code>stop</code>：指定區間的結束值，不包含 <code>stop</code>。</li><li><code>step</code>：區間遞增的間隔，若沒有輸入則預設為 1。</li></ul>
+<pre class="static"><code>random.randint(a, b)</code></pre>
+<ul><li>產生一個 [<code>a</code>, <code>b</code>] 區間內的隨機整數。</li></ul>
+<p>例如，以下的程式碼會隨機產生 1 到 9 之間的整數：</p>
+<pre class="static"><code class="lang-python">import random
+
+rand_int = random.randrange(1, 10, 1)
+print(rand_int)
+
+rand_int = random.randint(1, 9)
+print(rand_int)</code></pre>
+<p>輸出結果每個人會不同：</p>
+<pre class="static"><code>9
+7</code></pre>
+<p>注意兩個函數結束值的差別：<code>randrange()</code> 的 <code>stop</code> 和<a href="https://vocus.cc/article/61b1bff0fd89780001f8ae74">第 06 章</a>的 <code>range()</code> 一樣不包含在內，所以要寫 10 才會產生到 9；<code>randint()</code> 則包含 <code>b</code>，寫 9 就會產生到 9。</p>
+<p>每次執行的結果都會不同，這正是隨機的用意。如果想讓隨機的結果可以重現，例如除錯時希望每次都拿到同樣的數字，<a href="https://vocus.cc/article/61b80be7fd897800012d5ad8">下一章</a>會介紹怎麼做。</p>
+<h2>產生隨機浮點數</h2>
+<p>以下幾個方法可以產生隨機浮點數：</p>
+<pre class="static"><code>random.random()</code></pre>
+<ul><li>產生一個 [0.0, 1.0) 區間內的隨機浮點數。</li></ul>
+<pre class="static"><code>random.uniform(a, b)</code></pre>
+<ul><li>產生一個 [<code>a</code>, <code>b</code>]（如果 <code>a &lt;= b</code>）或 [<code>b</code>, <code>a</code>]（如果 <code>b &lt; a</code>）區間內的隨機浮點數。</li></ul>
+<pre class="static"><code>random.expovariate(lambd)</code></pre>
+<ul><li>產生一個服從指數分布的隨機浮點數，<code>lambd</code> 是期望平均值的倒數。參數名稱少了一個字母 a，是因為 <code>lambda</code> 在 Python 裡是保留字，不能拿來當參數名稱。</li></ul>
+<pre class="static"><code>random.gauss(mu, sigma)
+random.normalvariate(mu, sigma)</code></pre>
+<ul><li>產生一個平均為 <code>mu</code>、標準差為 <code>sigma</code> 的常態分布的隨機浮點數。</li></ul>
+<p><code>gauss()</code> 和 <code>normalvariate()</code> 產生的都是常態分布的隨機數。根據 Python 官方文件，<code>gauss()</code> 稍微快一些，但在多執行緒（multithreading）的程式裡，兩個執行緒同時呼叫時可能會拿到相同的值；在本章的練習兩者擇一使用即可。</p>
+<p>以下範例依序用上面五個函數產生隨機浮點數，其中指數分布的 <code>lambd</code> 設為 0.1，兩個常態分布都設為平均 0、標準差 1：</p>
+<pre class="static"><code class="lang-python">import random
+
+rand_float = random.random()
+print(rand_float)
+
+rand_float = random.uniform(0, 1)
+print(rand_float)
+
+rand_float = random.expovariate(0.1)
+print(rand_float)
+
+rand_float = random.gauss(0, 1)
+print(rand_float)
+
+rand_float = random.normalvariate(0, 1)
+print(rand_float)</code></pre>
+<p>輸出結果同樣每個人會不同：</p>
+<pre class="static"><code>0.8625930391422392
+0.7556453212005825
+0.13170214600390084
+0.5748607231832283
+-0.09085395755220001</code></pre>
+<h2>隨機排列與取出元素</h2>
+<p>和隨機整數及隨機浮點數相同，我們也可在一組序列資料中隨機取出一筆資料或資料集合：</p>
+<pre class="static"><code>random.shuffle(x)</code></pre>
+<ul><li>使序列資料 <code>x</code> 重新隨機排列。</li></ul>
+<pre class="static"><code>random.choice(x)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出一個元素。</li></ul>
+<pre class="static"><code>random.choices(x, weights=None, *, cum_weights=None, k=1)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個元素，同一個元素可能被重複取出，並可設定每個元素取出的權重（weights）或累積權重（cum_weights）。</li><li><code>*</code> 後面的 <code>cum_weights</code> 和 <code>k</code> 只能用名稱指定，例如要取出 2 個元素時要寫成 <code>k=2</code>，不能只寫 2。</li></ul>
+<pre class="static"><code>random.sample(x, k)</code></pre>
+<ul><li>從序列資料 <code>x</code> 中隨機取出 <code>k</code> 個不重複的元素。</li></ul>
+<p>以下範例以<a href="https://vocus.cc/article/61b06c3efd89780001f3adea">第 05 章</a>串列的例子，展示隨機排列與取出元素的結果：</p>
+<pre class="static"><code class="lang-python">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+random.shuffle(cities)
+print(cities)
+
+rand_city = random.choice(cities)
+print(rand_city)
+
+rand_city = random.choices(cities, [10, 20, 30, 40, 50], k=2)
+print(rand_city)
+
+rand_city = random.sample(cities, 2)
+print(rand_city)</code></pre>
+<p>輸出結果也是每個人會不同：</p>
+<pre class="static"><code>[&#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;新竹&#x27;, &#x27;桃園&#x27;, &#x27;台北&#x27;]
+桃園
+[&#x27;台北&#x27;, &#x27;桃園&#x27;]
+[&#x27;台北&#x27;, &#x27;台南&#x27;]</code></pre>
+<h3><code>shuffle()</code> 會直接修改原本的串列</h3>
+<p><code>shuffle()</code> 和<a href="https://vocus.cc/article/61b06c3efd89780001f3adea">第 05 章</a>〈直接修改原本串列的方法〉一樣，是直接打亂原本的串列，並不會回傳一個新的串列，因此把它的結果印出來只會得到 <code>None</code>：</p>
+<pre class="static"><code class="lang-python">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.shuffle(cities))
+print(cities)</code></pre>
+<p>執行結果（第二行每個人會不同）：</p>
+<pre class="static"><code>None
+[&#x27;台北&#x27;, &#x27;新竹&#x27;, &#x27;台南&#x27;, &#x27;桃園&#x27;, &#x27;台中&#x27;]</code></pre>
+<p>也因為 <code>shuffle()</code> 要修改原本的資料，它不能用在字串這種無法修改的序列上：</p>
+<pre class="static"><code class="lang-python">import random
+
+random.shuffle(&quot;Python&quot;)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>TypeError: &#x27;str&#x27; object does not support item assignment</code></pre>
+<h3><code>choices()</code> 與 <code>sample()</code> 的差別</h3>
+<p><code>choices()</code> 和 <code>sample()</code> 都可以一次取出好幾個元素，差別在於 <code>choices()</code> 每次都從完整的串列裡取，同一個元素可能被取出好幾次；<code>sample()</code> 取出的元素則不會重複。以下兩者都從 5 個城市裡取出 5 個：</p>
+<pre class="static"><code class="lang-python">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.choices(cities, k=5))
+print(random.sample(cities, 5))</code></pre>
+<p>輸出結果每個人會不同，這次 <code>choices()</code> 的結果裡「桃園」和「台北」都出現了兩次，<code>sample()</code> 則剛好是 5 個城市各一次：</p>
+<pre class="static"><code>[&#x27;台南&#x27;, &#x27;桃園&#x27;, &#x27;桃園&#x27;, &#x27;台北&#x27;, &#x27;台北&#x27;]
+[&#x27;台北&#x27;, &#x27;桃園&#x27;, &#x27;台中&#x27;, &#x27;台南&#x27;, &#x27;新竹&#x27;]</code></pre>
+<p>也因為 <code>sample()</code> 不會重複，要取出的個數不能超過串列的長度：</p>
+<pre class="static"><code class="lang-python">import random
+
+cities = [&quot;台北&quot;, &quot;桃園&quot;, &quot;新竹&quot;, &quot;台中&quot;, &quot;台南&quot;]
+print(random.sample(cities, 6))</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ValueError: Sample larger than population or is negative</code></pre>
+<hr>
+<p>這一章我們學會了匯入 random 模組，以及產生隨機整數、隨機浮點數，和從串列中隨機排列與取出元素的方法。遇到 <code>NameError</code> 時，可以先檢查是不是忘了匯入模組；遇到 <code>AttributeError</code> 時，則可以確認自己的檔案是不是取名為 <code>random.py</code>。</p>
+<h2>本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/07-random/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/07-random.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li><li><a href="https://wjweng.github.io/python-notes/web/07-random.html">在瀏覽器直接執行</a> — 不用登入，開啟就能改程式碼看結果</li></ul>
+  </article>
+</div>
+<script>
+const article = document.getElementById("article");
+const msg = document.getElementById("msg");
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
+      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
+    })]);
+    msg.textContent = "已複製 ✓";
+  } catch (e) {
+    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
+    const range = document.createRange();
+    range.selectNodeContents(article);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
+  }
+});
+</script>
+</body>
+</html>

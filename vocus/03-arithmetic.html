@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>方格子版 03｜基本數學運算</title>
+<style>
+  :root { --bg: #ffffff; --text: #1f2328; --dim: #59636e; --line: #d1d9e0; --note: #fff8c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding: 24px 16px 80px;
+          font-family: system-ui, sans-serif; line-height: 1.8; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .tool { position: sticky; top: 0; z-index: 5; background: var(--note); border: 1px solid #d4a72c;
+           border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+  .tool b { font-size: 15px; }
+  .tool button { font: inherit; font-weight: 700; padding: 6px 16px; margin-right: 10px;
+                  border-radius: 6px; border: 1px solid #1f2328; background: #1f2328; color: #fff;
+                  cursor: pointer; }
+  .tool .msg { color: #1a7f37; font-weight: 700; }
+  .tool ol { margin: 8px 0 0; padding-left: 22px; }
+  .tool code { font-size: 13px; }
+  pre { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+         overflow-x: auto; }
+  code { font-family: ui-monospace, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid var(--line); padding: 6px 12px; }
+  img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tool">
+    <b>第 03 章　基本數學運算</b>（方格子專用版，產生於 commit 當下的原稿）<br>
+    <button type="button" id="copy">複製內文</button><span class="msg" id="msg"></span>
+    <ol>
+      <li>按「複製內文」，到方格子的<a href="https://vocus.cc/article/61aef814fd89780001c8beb2">這篇文章</a>（編輯模式）全選內文、貼上。標題另外填</li>
+      <li>貼完跑 <code>python3 tools/check_vocus.py 03 &lt;文章網址&gt;</code></li>
+    </ol>
+  </div>
+  <article id="article">
+<h2>四則運算</h2>
+<p>Python 的四則運算透過 <code>+</code>（加）、<code>-</code>（減）、<code>*</code>（乘）、<code>/</code>（除）等算術運算子，或是 <code>+=</code>、<code>-=</code>、<code>*=</code>、<code>/=</code> 等指派運算子來達成。這裡的 <code>+=</code> 若寫成 <code>a += b</code>，即等同於 <code>a = a + b</code> 的意思。</p>
+<pre class="static"><code class="lang-python"># addition
+integer_x = 1 + 2          # integer_x = 3
+integer_x = integer_x + 1  # integer_x = 3 + 1 = 4
+integer_x += 1             # integer_x = 4 + 1 = 5
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python"># subtraction
+integer_x = 5 - 2          # integer_x = 5 - 2 = 3
+integer_x = integer_x - 1  # integer_x = 3 - 1 = 2
+integer_x -= 1             # integer_x = 2 - 1 = 1
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python"># multiplication
+integer_x = 1 * 2          # integer_x = 1 * 2 = 2
+integer_x = integer_x * 2  # integer_x = 2 * 2 = 4
+integer_x *= 2             # integer_x = 4 * 2 = 8
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python"># division
+float_x = 8 / 2            # float_x = 8 / 2 = 4.0
+float_x = float_x / 2      # float_x = 4.0 / 2 = 2.0
+float_x /= 2               # float_x = 2.0 / 2 = 1.0
+print(float_x)
+print(type(float_x))</code></pre>
+<p>須注意一旦做了除法（<code>/</code>）的運算，即使原本的資料型態是整數，也會被自動轉換成浮點數。計算結果如下：</p>
+<pre class="static"><code>5
+1
+8
+1.0
+&lt;class &#x27;float&#x27;&gt;</code></pre>
+<p>同樣的，整數和浮點數混在一起運算時，結果也會是浮點數：</p>
+<pre class="static"><code class="lang-python">print(1 + 2.0)
+print(type(1 + 2.0))</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>3.0
+&lt;class &#x27;float&#x27;&gt;</code></pre>
+<p>另外，除數不能是 0，否則會產生錯誤：</p>
+<pre class="static"><code class="lang-python">print(1 / 0)</code></pre>
+<p>錯誤訊息的最後一行如下：</p>
+<pre class="static"><code>ZeroDivisionError: division by zero</code></pre>
+<h3>浮點數的誤差</h3>
+<p>浮點數的運算，有時候會得到有點奇怪的結果，例如：</p>
+<pre class="static"><code class="lang-python">print(0.1 + 0.2)
+print(round(0.1 + 0.2, 2))</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>0.30000000000000004
+0.3</code></pre>
+<p>這並不是 Python 算錯了，而是電腦用二進位儲存小數，有些小數沒辦法剛好存下來，只能存一個非常接近的值，就像十進位沒辦法把 1/3 完整寫出來一樣。需要顯示結果時，可以用 <code>round()</code> 函數取到指定的小數位數，第二個參數就是要保留的位數。之後要比較兩個浮點數是否相等時，也要特別留意這個誤差。</p>
+<h2>商數和餘數</h2>
+<p>商數透過 <code>//</code> 及 <code>//=</code>、餘數透過 <code>%</code> 及 <code>%=</code> 來達成。</p>
+<pre class="static"><code class="lang-python"># quotient
+integer_x = 5 // 2  # 5 / 2 = 2 ... 1
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python">integer_x = 5
+integer_x //= 2
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python"># remainder
+integer_x = 5 % 2  # 5 / 2 = 2 ... 1
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python">integer_x = 5
+integer_x %= 2
+print(integer_x)</code></pre>
+<p>計算結果：</p>
+<pre class="static"><code>2
+2
+1
+1</code></pre>
+<p>和 <code>/</code> 不同，<code>//</code> 兩邊都是整數時，計算結果也會是整數。</p>
+<p>要注意的是，負數的商數是往比較小的方向取整數，而不是直接把小數去掉，所以 <code>-5 // 2</code> 會得到 <code>-3</code> 而不是 <code>-2</code>，餘數則是 <code>1</code>（因為 <code>-3 * 2 + 1 = -5</code>）：</p>
+<pre class="static"><code class="lang-python">print(-5 // 2)
+print(-5 % 2)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>-3
+1</code></pre>
+<p>如果商數和餘數都需要，可以用 <code>divmod()</code> 函數一次取得，結果會用括號把商數和餘數包在一起：</p>
+<pre class="static"><code class="lang-python">print(divmod(5, 2))</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>(2, 1)</code></pre>
+<h2>次方</h2>
+<p>次方透過 <code><strong></code> 及 <code></strong>=</code> 來達成。</p>
+<pre class="static"><code class="lang-python"># exponent
+integer_x = 2 ** 3  # integer_x = 2 ** 3 = 8
+print(integer_x)</code></pre>
+<pre class="static"><code class="lang-python">integer_x = 2
+integer_x **= 3
+print(integer_x)</code></pre>
+<p>計算結果：</p>
+<pre class="static"><code>8
+8</code></pre>
+<p>要注意 Python 的次方是兩個星號，不是數學上常見的 <code>^</code>。<code>^</code> 在 Python 裡是另一種運算（XOR 位元運算），<code>2 ^ 3</code> 並不會得到 8：</p>
+<pre class="static"><code class="lang-python">print(2 ^ 3)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>1</code></pre>
+<p>另外，Python 的整數沒有大小上限，次方算出很大的數字也沒問題：</p>
+<pre class="static"><code class="lang-python">print(2 ** 100)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>1267650600228229401496703205376</code></pre>
+<h2>運算的優先順序</h2>
+<p>如同我們在國小學習的四則運算，需記住一個 PEMDAS 原則，運算時的優先順序依序為括號優先、再來次方、乘除、最後是加減。</p>
+<div class="tablewrap"><table><thead><tr><th>縮寫</th><th>英文</th><th>中文</th></tr></thead><tbody><tr><td>P</td><td>Parentheses</td><td>括號</td></tr><tr><td>E</td><td>Exponents</td><td>次方</td></tr><tr><td>MD</td><td>Multiplication and Division</td><td>乘除</td></tr><tr><td>AS</td><td>Addition and Subtraction</td><td>加減</td></tr></tbody></table></div>
+<p>例如以下兩行，只差在有沒有括號，結果就不一樣：</p>
+<pre class="static"><code class="lang-python">print(2 + 3 * 4)
+print((2 + 3) * 4)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>14
+20</code></pre>
+<p>有幾個細節要注意：</p>
+<ul><li><code>//</code> 和 <code>%</code> 跟乘除在同一層，一樣由左而右計算，例如 <code>2 * 3 % 4</code> 會先算 <code>2 * 3</code> 得到 6，再取餘數得到 2</li><li>次方是例外，連續的次方是<strong>由右而左</strong>計算，<code>2 <strong> 3 </strong> 2</code> 會先算 <code>3 ** 2</code>，得到的是 2 的 9 次方</li><li>負號比次方晚算，<code>-2 <strong> 2</code> 等同於 <code>-(2 </strong> 2)</code>，想算負 2 的平方要寫成 <code>(-2) ** 2</code></li></ul>
+<pre class="static"><code class="lang-python">print(2 * 3 % 4)
+print(2 ** 3 ** 2)
+print(-2 ** 2)
+print((-2) ** 2)</code></pre>
+<p>執行結果：</p>
+<pre class="static"><code>2
+512
+-4
+4</code></pre>
+<p>不確定先算哪一個的時候，加上括號最保險，程式也會比較容易閱讀。</p>
+<hr>
+<p>這一章我們認識了 Python 的算術運算子與指派運算子，也看到了除法會產生浮點數、浮點數會有誤差、負數的商數往小的方向取整數這些容易踩到的細節。運算的順序大致跟數學一樣，遇到不確定的地方，用括號把想先算的部分包起來就好。</p>
+<h2>本章程式碼</h2>
+<ul><li><a href="https://github.com/wjweng/python-notes/tree/main/chapters/03-arithmetic/code/">GitHub</a> — 本章所有可執行範例</li><li><a href="https://colab.research.google.com/github/wjweng/python-notes/blob/main/notebooks/03-arithmetic.ipynb">在 Colab 開啟</a> — 用 Google 帳號登入就能執行，可以複製一份留在自己的雲端硬碟</li><li><a href="https://wjweng.github.io/python-notes/web/03-arithmetic.html">在瀏覽器直接執行</a> — 不用登入，開啟就能改程式碼看結果</li></ul>
+  </article>
+</div>
+<script>
+const article = document.getElementById("article");
+const msg = document.getElementById("msg");
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([article.innerHTML], { type: "text/html" }),
+      "text/plain": new Blob([article.innerText], { type: "text/plain" }),
+    })]);
+    msg.textContent = "已複製 ✓";
+  } catch (e) {
+    // 舊瀏覽器沒有 ClipboardItem：改成選取整篇，再用 execCommand 複製
+    const range = document.createRange();
+    range.selectNodeContents(article);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    msg.textContent = document.execCommand("copy") ? "已複製 ✓" : "已選取，請按 Ctrl+C";
+  }
+});
+</script>
+</body>
+</html>
