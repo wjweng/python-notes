@@ -158,7 +158,7 @@ print()</textarea><pre id="out2"></pre></div>
 <p>同一串裡的 5 個數字各不相同，看起來一樣是隨機的，但只要種子相同，整串數字就會完全一樣，重新執行整支程式也一樣。</p>
 <p><a href="https://wjweng.github.io/python-notes/web/07-random.html">第 07 章</a>提到每次執行的結果都會不同，那是因為沒有設定種子。固定種子在除錯或測試時很有用，程式的結果跟預期不一樣時，固定種子就能讓每次執行都重現同一個情況，方便找出問題；把程式分享給別人時，對方設定同樣的種子，也能得到跟我們一樣的結果。</p>
 <h3 id="s3">換了 Python 版本，結果可能不同</h3>
-<p>不過要注意，根據 Python 官方文件，random 模組大部分的演算法與設定種子的方式，都可能隨著 Python 的版本改變，只有 <code>random()</code> 函數產生的數列保證不變。因此同一個種子在不同版本的 Python 上，<code>randint()</code> 等函數的結果可能會不一樣。本章的執行結果是用 Python 3.13 跑出來的，我也用 Python 3.12 實測過，結果相同；如果你用其他版本跑出來的數字跟文章不同，並不是程式寫錯了。</p>
+<p>不過要注意，根據 Python 官方文件，random 模組大部分的演算法與設定種子的方式，都可能隨著 Python 的版本改變，只有 <code>random()</code> 函數產生的數列保證不變。因此同一個種子在不同版本的 Python 上，<code>randint()</code> 等函數的結果可能會不一樣。本章的執行結果是用 Python 3.13 跑出來的，也在 Python 3.12 實測過，結果相同；如果用其他版本跑出來的數字跟文章不同，並不是程式寫錯了。</p>
 <h2 id="s4">儲存與還原狀態</h2>
 <p>我們也可以在調用 random 模組前，先用 <code>random.getstate()</code> 把隨機數生成器目前的狀態存起來：</p>
 <pre class="static"><code>rand_state = random.getstate()</code></pre>
