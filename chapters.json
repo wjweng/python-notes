@@ -142,6 +142,25 @@
         "rand_state = random.getstate()\n\nrand_int"
       ],
       "vocus": "https://vocus.cc/article/61b80be7fd897800012d5ad8"
+    },
+    {
+      "num": "09",
+      "unit": 2,
+      "dir": "09-password-generator",
+      "title": "專題：密碼產生器",
+      "snippet": "import random\nrandom.shuffle(password_list)\nprint(\"\".join(password_list))",
+      "web_static": [],
+      "web_runnable": [
+        "password_list += \"ab\"",
+        "\"-\".join(password_list)",
+        "random.shuffle(password_list)\n\npassword = \"\"",
+        "secrets.SystemRandom().shuffle(password_list)\n\npassword = \"\""
+      ],
+      "web_output_differs": [
+        "random.shuffle(password_list)\n\npassword = \"\"",
+        "secrets.SystemRandom().shuffle(password_list)\n\npassword = \"\""
+      ],
+      "vocus": "https://vocus.cc/article/61b8c38bfd89780001bca9ee"
     }
   ]
 }

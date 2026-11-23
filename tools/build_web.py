@@ -40,7 +40,8 @@ def inline(s: str) -> str:
     return s
 
 
-def render(md: str, static_marks: list[str]) -> tuple[str, int, list[tuple[int, str, str]]]:
+def render(md: str, static_marks: list[str],
+           runnable_marks: list[str] | None = None) -> tuple[str, int, list[tuple[int, str, str]]]:
     """回傳 (HTML, 可執行區塊數量, 目錄項目)。目錄項目是 (層級, id, 標題)。"""
     out: list[str] = []
     toc: list[tuple[int, str, str]] = []
@@ -63,6 +64,11 @@ def render(md: str, static_marks: list[str]) -> tuple[str, int, list[tuple[int, 
             # 有些 python 區塊不適合在瀏覽器跑（例如檢查本機環境的程式，
             # 在 Pyodide 裡回報的是 Pyodide 自己的環境，對讀者沒有意義）
             is_static = any(mark in code for mark in static_marks)
+            # web_runnable：專題章（第 09 章起）分步驟的區塊是完整程式的片段，彼此依賴、不能單獨執行，
+            # 而完整程式又包含每個片段，web_static 的「含有就靜態」分不開。有列 web_runnable 的章節
+            # 反過來：只有含這些片段的區塊可以執行，其餘一律靜態顯示。
+            if runnable_marks is not None and not any(mark in code for mark in runnable_marks):
+                is_static = True
             if lang == "python" and not is_static:
                 out.append(
                     f'<div class="demo"><div class="head">'
@@ -418,7 +424,7 @@ def build(ch: dict) -> tuple[Path, int]:
     md = targets.filter_blocks(md, "web")
     md = targets.chapter_links(md, "web")
     md = targets.absolute_links(md, ch["dir"], f"../chapters/{ch['dir']}")
-    content, runnable, toc = render(md, ch.get("web_static", []))
+    content, runnable, toc = render(md, ch.get("web_static", []), ch.get("web_runnable"))
     links = "".join(
         f'<a class="item lv{lv}" href="#{hid}" data-id="{hid}">{html.escape(title)}</a>'
         for lv, hid, title in toc
